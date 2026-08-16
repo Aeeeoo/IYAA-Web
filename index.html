@@ -14,7 +14,7 @@
     <section class="hero hero-full" style="background-image: linear-gradient(rgba(20, 30, 50, 0.25), rgba(20, 30, 50, 0.55)), url('pexels-mikhail-nilov-8922331.jpg');">
       <div class="container">
         <span class="eyebrow">International Young Authors Association</span>
-        <h1>아이의 첫 이야기가<br />시작되는 곳, IYAA.</h1>
+        <h1>아이의 첫 이야기가<br />시작되는 곳</h1>
         <p>IYAA는 미취학 아동이 자신의 상상을 이야기로 표현하는 즐거움을 만나고, 그 이야기를 세상과 나눌 수 있도록 함께하는 국제 창작·스토리텔링 협회입니다.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="signup.html">회원가입</a>
@@ -28,28 +28,22 @@
         <div class="section-head">
           <div>
             <div class="eyebrow">What we do</div>
-            <h2>아이의 이야기를 함께 키우는 세 가지 방향</h2>
+            <h2>생각에서 이야기로,<br />아이를 작가로.</h2>
           </div>
-          <p>IYAA는 놀이와 언어, 상상과 표현이 만나는 시간을 만들어갑니다.</p>
+          <p>IYAA는 아이가 마음속에 떠올린 생각을 상상으로 펼치고, 그 상상을 이야기로 엮어, 자신의 이야기를 세상에 내놓는 작가가 되기까지의 여정을 함께합니다.</p>
         </div>
         <div class="grid grid-3">
-          <article class="card">
-            <div class="meta">01 · Play</div>
-            <h3>이야기 놀이</h3>
-            <p>아이가 자연스럽게 이야기를 만들고 상상할 수 있는 창작 놀이 프로그램을 준비하고 있습니다.</p>
-            <span class="card-cta">Coming soon</span>
+          <article class="card card-word">
+            <div class="word">Imagine</div>
+            <p>아이의 마음속에 떠오른 생각과 궁금함을 자유로운 상상으로 펼칠 수 있도록 돕습니다.</p>
           </article>
-          <article class="card">
-            <div class="meta">02 · Share</div>
-            <h3>이야기 나누기</h3>
-            <p>아이가 만든 이야기를 가족과 친구, 세상과 나눌 수 있는 무대를 준비하고 있습니다.</p>
-            <span class="card-cta">Coming soon</span>
+          <article class="card card-word">
+            <div class="word">Story</div>
+            <p>흩어진 상상의 조각들을 아이 자신의 언어로, 하나의 이야기로 엮어냅니다.</p>
           </article>
-          <article class="card">
-            <div class="meta">03 · Grow</div>
-            <h3>함께 자라기</h3>
-            <p>양육자·교사와 함께 아이의 이야기를 응원하는 커뮤니티를 만들어갑니다.</p>
-            <span class="card-cta">Coming soon</span>
+          <article class="card card-word">
+            <div class="word">Author</div>
+            <p>자신의 이야기를 세상에 내놓으며 진짜 작가로 성장하는 여정을 응원합니다.</p>
           </article>
         </div>
       </div>
@@ -121,7 +115,7 @@
       nSlot.innerHTML = items
         .map(
           (n) => `
-        <a class="notice-item" href="notice.html#${n.id}">
+        <a class="notice-item" href="notice-detail.html?id=${n.id}">
           <span class="tag ${n.category === "important" ? "important" : ""}">${labelOf(n.category)}</span>
           <span class="title">${escapeHtml(n.title)}</span>
           <span class="date">${n.date}</span>

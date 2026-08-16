@@ -27,11 +27,7 @@
       <header class="site-header">
         <div class="container">
           <a class="brand" href="index.html" aria-label="IYAA 홈">
-            <span class="brand-mark">IY</span>
-            <span class="brand-name">
-              <b>IYAA</b>
-              <small>Young Authors Association</small>
-            </span>
+            <img class="brand-logo" src="International Young Authors 로고.png" alt="IYAA" />
           </a>
           <nav class="nav" data-nav>
             <a href="about.html" data-nav-key="about">협회 소개</a>

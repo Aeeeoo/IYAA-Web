@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>공지사항 | IYAA</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="notice">
+  <div data-header></div>
+
+  <main>
+    <section class="hero" style="padding: 60px 0 24px;">
+      <div class="container">
+        <span class="eyebrow">Notice</span>
+        <h1>공지사항</h1>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 24px;">
+      <div class="container">
+        <div style="max-width: 860px; margin: 0 auto;">
+          <div data-notice-detail></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-footer></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      const notices = window.IYAA.getNotices();
+      const target = document.querySelector("[data-notice-detail]");
+      const catLabel = { important: "중요", notice: "공지", event: "행사", press: "보도" };
+
+      function notFound(msg) {
+        target.innerHTML = `
+          <div style="padding:80px 0; text-align:center;">
+            <p style="color:var(--muted); margin-bottom:16px;">${msg}</p>
+            <a href="notice.html" class="btn btn-outline btn-sm">공지사항 목록으로</a>
+          </div>`;
+      }
+
+      if (!id) { notFound("공지 ID가 없습니다."); return; }
+      const idx = notices.findIndex((n) => n.id === id);
+      if (idx === -1) { notFound("해당 공지를 찾을 수 없습니다."); return; }
+
+      // Increment view count on load so refresh counts as a new view.
+      const currentViews = window.IYAA.incrementNoticeView(id);
+      const n = notices[idx];
+      n.views = currentViews;
+      // List order convention: prev = 위쪽 항목 (idx-1), next = 아래쪽 항목 (idx+1).
+      const prev = idx > 0 ? notices[idx - 1] : null;
+      const next = idx < notices.length - 1 ? notices[idx + 1] : null;
+
+      target.innerHTML = `
+        <a href="notice.html" style="display:inline-block; color:var(--muted); font-size:14px; margin-bottom:20px;">← 목록으로</a>
+
+        <article style="padding: 24px 0 48px; border-top: 2px solid var(--ink);">
+          <div style="padding: 28px 0 20px;">
+            <span class="tag ${n.category === 'important' ? 'important' : ''}"
+              style="display:inline-block; padding:4px 12px; border-radius:2px;
+              background:${n.category === 'important' ? 'var(--yellow-soft)' : 'var(--surface-alt)'};
+              color:${n.category === 'important' ? 'var(--yellow-ink)' : 'var(--ink-soft)'};
+              font-size:12px; font-weight:600; margin-bottom:14px;">
+              ${catLabel[n.category] || '공지'}
+            </span>
+            <h2 style="font-size: 1.75rem; font-weight:700; letter-spacing:-0.02em; margin-bottom: 14px; color: var(--ink);">
+              ${escapeHtml(n.title)}
+            </h2>
+            <div style="color: var(--muted); font-size: 13.5px;">
+              <span>${n.date}</span>
+              <span style="margin: 0 8px; color: var(--border-strong, #cfd4dc);">·</span>
+              <span>${escapeHtml(n.author)}</span>
+              <span style="margin: 0 8px; color: var(--border-strong, #cfd4dc);">·</span>
+              <span>조회 ${n.views || 0}</span>
+            </div>
+          </div>
+
+          <div style="padding: 32px 0; border-top: 1px solid var(--surface-alt);
+                      font-size: 15px; line-height: 1.9; color: var(--ink-soft);
+                      white-space: pre-wrap;">${escapeHtml(n.body)}</div>
+        </article>
+
+        <nav style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+                    padding-top: 24px;">
+          ${prev ? `
+            <a href="notice-detail.html?id=${prev.id}"
+              style="display:block; padding: 22px 24px; background: var(--surface-alt);
+                     color: var(--ink); text-decoration: none; border-radius: var(--radius);">
+              <div style="font-size: 12px; color: var(--muted); font-weight:600; margin-bottom: 6px; letter-spacing: 0.04em;">← 이전 글</div>
+              <div style="font-weight: 500; font-size: 14.5px;">${escapeHtml(prev.title)}</div>
+            </a>` : `
+            <div style="padding: 22px 24px; background: var(--surface-alt);
+                        color: var(--muted); border-radius: var(--radius);">
+              <div style="font-size: 12px; font-weight:600; margin-bottom: 6px; letter-spacing: 0.04em;">← 이전 글</div>
+              <div style="font-size: 14.5px;">이전 글이 없습니다</div>
+            </div>`}
+          ${next ? `
+            <a href="notice-detail.html?id=${next.id}"
+              style="display:block; padding: 22px 24px; background: var(--surface-alt);
+                     color: var(--ink); text-decoration: none; text-align: right;
+                     border-radius: var(--radius);">
+              <div style="font-size: 12px; color: var(--muted); font-weight:600; margin-bottom: 6px; letter-spacing: 0.04em;">다음 글 →</div>
+              <div style="font-weight: 500; font-size: 14.5px;">${escapeHtml(next.title)}</div>
+            </a>` : `
+            <div style="padding: 22px 24px; background: var(--surface-alt);
+                        color: var(--muted); text-align: right; border-radius: var(--radius);">
+              <div style="font-size: 12px; font-weight:600; margin-bottom: 6px; letter-spacing: 0.04em;">다음 글 →</div>
+              <div style="font-size: 14.5px;">다음 글이 없습니다</div>
+            </div>`}
+        </nav>
+      `;
+    })();
+  </script>
+</body>
+</html>

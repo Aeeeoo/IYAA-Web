@@ -18,6 +18,7 @@
       author: "IYAA 사무국",
       body:
         "미취학 아동을 위한 국제 창작·스토리텔링 협회 IYAA의 홈페이지가 오픈되었습니다. 프로그램과 공지사항은 준비되는 대로 순차적으로 안내될 예정입니다.",
+      views: 0,
     },
   ];
 
@@ -66,6 +67,14 @@
     setContests: (v) => write(KEYS.contests, v),
     getUsers: () => read(KEYS.users, []),
     setUsers: (v) => write(KEYS.users, v),
+    incrementNoticeView: (id) => {
+      const notices = read(KEYS.notices, []);
+      const n = notices.find((x) => x.id === id);
+      if (!n) return 0;
+      n.views = (n.views || 0) + 1;
+      write(KEYS.notices, notices);
+      return n.views;
+    },
   };
 
   ensureSeed();

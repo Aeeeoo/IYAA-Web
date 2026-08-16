@@ -8,11 +8,11 @@
   --yellow-ink: #7a5e00;
 
   /* --- Surfaces / bg --------------------------------------------------- */
-  --bg: #ffffff;
+  --bg: #eef2f6;            /* light gray-blue body bg (white nav pops) */
   --surface: #ffffff;
-  --surface-alt: #f5f6f8;   /* subtle group panel */
-  --surface-hover: #eef1f5;
-  --surface-tint: #eaf0f6;
+  --surface-alt: #f5f6f8;
+  --surface-hover: #e4eaf0;
+  --surface-tint: #e3ebf3;
 
   /* --- Ink ------------------------------------------------------------- */
   --ink: #14273e;
@@ -37,12 +37,18 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { height: 100%; }
 html {
-  scroll-snap-type: y mandatory;
-  scroll-padding-top: 72px;
+  min-height: 100%;
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 96px;
   scroll-behavior: smooth;
 }
+
+/* JS가 헤더/푸터를 이 slot div 안에 렌더링하는데, 래퍼 div가 sticky의
+   containing block이 되어 헤더 높이만큼만 붙어버림. display: contents로
+   div를 레이아웃에서 제거해서 .site-header의 containing block이 body가
+   되도록 한다. */
+[data-header], [data-footer] { display: contents; }
 body {
   font-family: var(--sans);
   color: var(--ink);
@@ -86,14 +92,14 @@ p { color: var(--ink-soft); }
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--navy);
-  color: #fff;
+  background: #fff;
+  color: var(--ink);
 }
 .site-header .container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  height: 96px;
   gap: 32px;
 }
 .brand {
@@ -101,17 +107,13 @@ p { color: var(--ink-soft); }
   align-items: center;
   gap: 12px;
   font-size: 1rem;
-  color: #fff;
+  color: var(--ink);
 }
-.brand-mark {
-  width: 36px; height: 36px;
-  border-radius: var(--radius);
-  background: #fff;
-  color: var(--navy);
-  display: grid; place-items: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
+.brand-logo {
+  height: 96px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 .brand-name {
   display: flex;
@@ -119,9 +121,9 @@ p { color: var(--ink-soft); }
   justify-content: center;
   line-height: 1;
 }
-.brand-name b { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; color: #fff; line-height: 1; }
+.brand-name b { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; color: var(--ink); line-height: 1; }
 .brand-name small {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
   font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -138,29 +140,21 @@ p { color: var(--ink-soft); }
   justify-content: space-evenly;
 }
 .nav a {
-  padding: 8px 14px;
+  padding: 10px 18px;
   border-radius: var(--radius-sm);
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--ink-soft);
+  font-size: 16px;
+  font-weight: 700;
   transition: color .12s, background .12s;
 }
-.nav a:hover { color: #fff; }
+.nav a:hover { color: var(--ink); }
 .nav a.active {
   color: var(--navy);
   font-weight: 700;
   background: var(--yellow-soft);
 }
 
-.auth-nav { display: flex; gap: 8px; align-items: center; color: #fff; }
-
-/* Header button overrides for navy context. */
-.site-header .btn-primary { background: #fff; color: var(--navy); }
-.site-header .btn-primary:hover { background: var(--yellow-soft); color: var(--navy); }
-.site-header .btn-outline { background: rgba(255, 255, 255, 0.12); color: #fff; }
-.site-header .btn-outline:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
-.site-header .btn-ghost { color: rgba(255, 255, 255, 0.85); }
-.site-header .btn-ghost:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.auth-nav { display: flex; gap: 8px; align-items: center; color: var(--ink); }
 
 /* --- Buttons ----------------------------------------------------------- */
 .btn {
@@ -197,20 +191,20 @@ p { color: var(--ink-soft); }
 }
 .hero .eyebrow {
   display: inline-block;
-  font-size: 12px;
-  letter-spacing: 0.18em;
+  font-size: 16px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--navy);
-  margin-bottom: 20px;
-  font-weight: 600;
+  margin-bottom: 22px;
+  font-weight: 700;
   position: relative;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
 }
 .hero .eyebrow::after {
   content: "";
   position: absolute;
   left: 0; bottom: 0;
-  width: 32px; height: 2px;
+  width: 40px; height: 3px;
   background: var(--yellow-mid);
 }
 .hero h1 { max-width: 820px; margin-bottom: 20px; }
@@ -220,7 +214,7 @@ p { color: var(--ink-soft); }
 /* Full-viewport hero with photo background. Fills the screen below the
    sticky navbar so the next section (What we do) appears on scroll. */
 .hero-full {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 96px);
   padding: 0;
   display: flex;
   align-items: center;
@@ -238,10 +232,26 @@ p { color: var(--ink-soft); }
 .hero-full .btn-outline { background: rgba(255, 255, 255, 0.14); color: #fff; }
 .hero-full .btn-outline:hover { background: rgba(255, 255, 255, 0.26); color: #fff; }
 
+/* Wide image banner (25:9) — used for subpage headers. Shorter than 16:9
+   so the section doesn't dominate the viewport. */
+.hero-banner {
+  aspect-ratio: 25 / 9;
+  padding: 0 0 40px;
+  color: #fff;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+}
+.hero-banner h1, .hero-banner .eyebrow { color: #fff; }
+.hero-banner p { color: rgba(255, 255, 255, 0.92); }
+.hero-banner .eyebrow::after { background: var(--yellow-mid); }
+
 /* --- Sections ---------------------------------------------------------- */
 .section { padding: 72px 0; }
 .section-full {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 96px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -256,12 +266,12 @@ p { color: var(--ink-soft); }
   flex-wrap: wrap;
 }
 .section-head .eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.18em;
+  font-size: 16px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--navy);
-  margin-bottom: 8px;
-  font-weight: 600;
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 .section-head h2 { color: var(--ink); }
 .section-head p { max-width: 540px; color: var(--ink-soft); font-size: 14px; }
@@ -303,11 +313,35 @@ p { color: var(--ink-soft); }
   font-size: 13px;
 }
 
+/* Single-word focus card: one large centered term with a supporting line. */
+.card-word {
+  text-align: center;
+  padding: 56px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+.card-word .word {
+  font-size: clamp(2rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.card-word p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
 /* --- Notice list ------------------------------------------------------- */
 .notice-list { }
 .notice-item {
   display: grid;
-  grid-template-columns: 100px 1fr 110px 120px;
+  grid-template-columns: 90px 1fr 110px 110px 90px;
   align-items: center;
   padding: 18px 12px;
   gap: 20px;
@@ -334,10 +368,11 @@ p { color: var(--ink-soft); }
 }
 .notice-item .title { font-weight: 500; font-size: 15px; color: var(--ink); }
 .notice-item .date { color: var(--muted); font-size: 13px; }
-.notice-item .author { color: var(--muted); font-size: 13px; text-align: right; }
+.notice-item .author { color: var(--muted); font-size: 13px; }
+.notice-item .views { color: var(--muted); font-size: 13px; text-align: right; }
 @media (max-width: 720px) {
   .notice-item { grid-template-columns: 80px 1fr; }
-  .notice-item .date, .notice-item .author { display: none; }
+  .notice-item .date, .notice-item .author, .notice-item .views { display: none; }
 }
 
 /* --- Filter row / tabs ------------------------------------------------- */
@@ -385,7 +420,7 @@ p { color: var(--ink-soft); }
 
 /* --- Forms ------------------------------------------------------------- */
 .form-wrap {
-  min-height: calc(100vh - 72px - 200px);
+  min-height: calc(100vh - 96px - 200px);
   display: grid;
   place-items: center;
   padding: 64px 24px;
@@ -514,7 +549,7 @@ p { color: var(--ink-soft); }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
-  align-items: center;
+  align-items: start;
 }
 @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
 
@@ -532,17 +567,51 @@ p { color: var(--ink-soft); }
 
 /* --- Hero panel (about page) ------------------------------------------ */
 .hero-panel {
-  background: var(--surface-tint);
   color: var(--ink);
-  border-radius: var(--radius);
-  padding: 36px;
-  aspect-ratio: 4/5;
+  padding: 72px 48px 48px;
+  min-height: 320px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  position: relative;
+  text-align: center;
 }
-.hero-panel .quote { font-size: 1.1rem; line-height: 1.55; color: var(--ink); font-weight: 500; }
-.hero-panel .attrib { font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+/* Big decorative opening/closing quotation marks at top-left and
+   bottom-right — visual "quote card" effect. */
+.hero-panel::before,
+.hero-panel::after {
+  position: absolute;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 7rem;
+  line-height: 1;
+  color: var(--navy);
+  opacity: 0.22;
+  font-weight: 400;
+  pointer-events: none;
+}
+.hero-panel::before { content: "\201C"; top: 18px; left: 32px; }
+.hero-panel::after  { content: "\201D"; bottom: 40px; right: 32px; }
+
+.hero-panel .quote {
+  font-size: clamp(1.35rem, 1.7vw, 1.65rem);
+  line-height: 1.55;
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+.hero-panel .attrib {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
 
 /* --- Modal ------------------------------------------------------------- */
 .modal-backdrop {
@@ -582,7 +651,7 @@ p { color: var(--ink-soft); }
 .admin-shell {
   display: grid;
   grid-template-columns: 240px 1fr;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 96px);
   background: var(--surface);
   color: var(--ink);
 }
