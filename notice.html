@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>공지사항 | IYAA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="notice">
+  <div data-header></div>
+
+  <main>
+    <section class="hero" style="padding-bottom: 24px;">
+      <div class="container">
+        <span class="eyebrow">Notice</span>
+        <h1>공지사항</h1>
+        <p>IYAA의 공식 공지, 행사 소식, 보도자료를 확인하세요.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 24px;">
+      <div class="container">
+        <div class="filter-row">
+          <div class="tabs" data-tabs>
+            <button class="tab active" data-cat="all">전체</button>
+            <button class="tab" data-cat="important">중요</button>
+            <button class="tab" data-cat="notice">공지</button>
+            <button class="tab" data-cat="event">행사</button>
+            <button class="tab" data-cat="press">보도</button>
+          </div>
+          <label class="search">
+            <span aria-hidden="true">🔍</span>
+            <input type="search" placeholder="제목 검색" data-search />
+          </label>
+        </div>
+
+        <div class="notice-list" data-notice-list></div>
+
+        <div id="empty" style="text-align:center;color:var(--muted);padding:40px 0;display:none;">
+          조건에 맞는 공지가 없습니다.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" data-modal>
+    <div class="modal">
+      <button class="close" data-modal-close aria-label="닫기">×</button>
+      <div class="meta" data-modal-meta></div>
+      <h2 data-modal-title></h2>
+      <p data-modal-body style="margin-top: 16px; line-height: 1.7;"></p>
+    </div>
+  </div>
+
+  <div data-footer></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (function () {
+      const listEl = document.querySelector("[data-notice-list]");
+      const emptyEl = document.getElementById("empty");
+      const searchEl = document.querySelector("[data-search]");
+      const tabsEl = document.querySelector("[data-tabs]");
+      const modal = document.querySelector("[data-modal]");
+      let cat = "all";
+      let query = "";
+
+      const catLabel = { important: "중요", notice: "공지", event: "행사", press: "보도" };
+      const all = window.IYAA.getNotices();
+
+      function render() {
+        const items = all.filter((n) => {
+          const catOk = cat === "all" || n.category === cat;
+          const qOk = !query || n.title.toLowerCase().includes(query.toLowerCase());
+          return catOk && qOk;
+        });
+        emptyEl.style.display = items.length ? "none" : "block";
+        listEl.innerHTML = items
+          .map(
+            (n) => `
+          <a class="notice-item" href="#${n.id}" data-id="${n.id}">
+            <span class="tag ${n.category === "important" ? "important" : ""}">${catLabel[n.category] || "공지"}</span>
+            <span class="title">${escapeHtml(n.title)}</span>
+            <span class="date">${n.date}</span>
+            <span class="author">${escapeHtml(n.author)}</span>
+          </a>`
+          )
+          .join("");
+      }
+
+      tabsEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".tab");
+        if (!btn) return;
+        tabsEl.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        btn.classList.add("active");
+        cat = btn.dataset.cat;
+        render();
+      });
+
+      searchEl.addEventListener("input", (e) => {
+        query = e.target.value.trim();
+        render();
+      });
+
+      listEl.addEventListener("click", (e) => {
+        const item = e.target.closest("[data-id]");
+        if (!item) return;
+        e.preventDefault();
+        const n = all.find((x) => x.id === item.dataset.id);
+        if (!n) return;
+        openModal(n);
+      });
+
+      function openModal(n) {
+        modal.querySelector("[data-modal-title]").textContent = n.title;
+        modal.querySelector("[data-modal-meta]").textContent = `${catLabel[n.category] || "공지"} · ${n.date} · ${n.author}`;
+        modal.querySelector("[data-modal-body]").textContent = n.body;
+        modal.classList.add("open");
+      }
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.matches("[data-modal-close]")) {
+          modal.classList.remove("open");
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+      });
+
+      render();
+
+      if (location.hash) {
+        const id = location.hash.slice(1);
+        const n = all.find((x) => x.id === id);
+        if (n) openModal(n);
+      }
+    })();
+  </script>
+</body>
+</html>

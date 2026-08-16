@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>관리자 | IYAA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="admin">
+  <div data-header></div>
+
+  <div class="admin-shell">
+    <aside class="admin-side">
+      <h4>Manage</h4>
+      <a data-view="dashboard" class="active">대시보드</a>
+      <a data-view="notices">공지사항 관리</a>
+      <a data-view="contests">대회 관리</a>
+      <a data-view="users">회원 관리</a>
+    </aside>
+
+    <main class="admin-main" data-admin-main>
+      <!-- rendered by script -->
+    </main>
+  </div>
+
+  <!-- Notice editor modal -->
+  <div class="modal-backdrop" data-notice-modal>
+    <div class="modal">
+      <button class="close" data-close aria-label="닫기">×</button>
+      <h2 data-title>공지 작성</h2>
+      <div style="margin-top:20px;">
+        <div class="field">
+          <label>제목</label>
+          <input type="text" data-n-title />
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>카테고리</label>
+            <select data-n-cat>
+              <option value="important">중요</option>
+              <option value="notice" selected>공지</option>
+              <option value="event">행사</option>
+              <option value="press">보도</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>날짜</label>
+            <input type="date" data-n-date />
+          </div>
+        </div>
+        <div class="field">
+          <label>내용</label>
+          <textarea data-n-body rows="5"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn btn-ghost btn-sm" data-close>취소</button>
+          <button class="btn btn-primary btn-sm" data-n-save>저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contest editor modal -->
+  <div class="modal-backdrop" data-contest-modal>
+    <div class="modal">
+      <button class="close" data-close aria-label="닫기">×</button>
+      <h2 data-title>대회 등록</h2>
+      <div style="margin-top:20px;">
+        <div class="form-row">
+          <div class="field"><label>대회명</label><input type="text" data-c-title /></div>
+          <div class="field"><label>부문</label><input type="text" data-c-cat placeholder="예: 소설·에세이·시" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>상태</label>
+            <select data-c-status>
+              <option value="open">진행 중</option>
+              <option value="upcoming">예정</option>
+              <option value="closed">종료</option>
+            </select>
+          </div>
+          <div class="field"><label>기간</label><input type="text" data-c-period placeholder="예: 2026-09-01 ~ 2026-10-31" /></div>
+        </div>
+        <div class="field"><label>시상</label><input type="text" data-c-award /></div>
+        <div class="field"><label>요약</label><textarea data-c-summary rows="3"></textarea></div>
+        <div class="field"><label>상세</label><textarea data-c-detail rows="4"></textarea></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn btn-ghost btn-sm" data-close>취소</button>
+          <button class="btn btn-primary btn-sm" data-c-save>저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (function () {
+      // Gate. currentUser() must exist and be admin, otherwise redirect.
+      const user = window.Auth.requireAdmin("login.html");
+      if (!user) return;
+
+      const sideLinks = document.querySelectorAll(".admin-side a[data-view]");
+      const main = document.querySelector("[data-admin-main]");
+      const noticeModal = document.querySelector("[data-notice-modal]");
+      const contestModal = document.querySelector("[data-contest-modal]");
+
+      let editingNoticeId = null;
+      let editingContestId = null;
+
+      const catLabel = { important: "중요", notice: "공지", event: "행사", press: "보도" };
+      const statusLabel = { open: "진행 중", upcoming: "예정", closed: "종료" };
+
+      sideLinks.forEach((a) => {
+        a.addEventListener("click", () => {
+          sideLinks.forEach((x) => x.classList.remove("active"));
+          a.classList.add("active");
+          render(a.dataset.view);
+        });
+      });
+
+      function render(view) {
+        if (view === "dashboard") renderDashboard();
+        else if (view === "notices") renderNotices();
+        else if (view === "contests") renderContests();
+        else if (view === "users") renderUsers();
+      }
+
+      function renderDashboard() {
+        const notices = window.IYAA.getNotices();
+        const contests = window.IYAA.getContests();
+        const users = window.IYAA.getUsers();
+        const openContests = contests.filter((c) => c.status === "open").length;
+        main.innerHTML = `
+          <div class="page-head">
+            <div>
+              <h2>관리자 대시보드</h2>
+              <p style="color:var(--muted);font-size:14px;margin-top:4px;">환영합니다, ${escapeHtml(user.name)}님.</p>
+            </div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="label">전체 회원</div><div class="value">${users.length}</div><div class="delta">활성 계정</div></div>
+            <div class="kpi"><div class="label">공지 총 개수</div><div class="value">${notices.length}</div></div>
+            <div class="kpi"><div class="label">진행 중 대회</div><div class="value">${openContests}</div></div>
+            <div class="kpi"><div class="label">등록 대회</div><div class="value">${contests.length}</div></div>
+          </div>
+          <div class="grid grid-2">
+            <div class="card">
+              <h3 style="margin-bottom:12px;">최근 공지</h3>
+              ${notices.slice(0, 4).map((n) => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">${escapeHtml(n.title)} <span style="color:var(--muted);font-size:12px;margin-left:8px;">${n.date}</span></div>`).join("")}
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:12px;">최근 회원</h3>
+              ${users.slice(-4).reverse().map((u) => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">${escapeHtml(u.name)} <span style="color:var(--muted);font-size:12px;margin-left:8px;">${escapeHtml(u.email)}</span></div>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderNotices() {
+        const items = window.IYAA.getNotices();
+        main.innerHTML = `
+          <div class="page-head">
+            <h2>공지사항 관리</h2>
+            <button class="btn btn-primary btn-sm" data-new-notice>+ 새 공지</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th style="width:100px;">카테고리</th><th>제목</th><th style="width:120px;">날짜</th><th style="width:120px;">작성자</th><th style="width:160px;text-align:right;">액션</th></tr>
+            </thead>
+            <tbody>
+              ${items.map((n) => `
+                <tr>
+                  <td><span class="tag ${n.category === "important" ? "important" : ""}">${catLabel[n.category] || "공지"}</span></td>
+                  <td>${escapeHtml(n.title)}</td>
+                  <td>${n.date}</td>
+                  <td>${escapeHtml(n.author)}</td>
+                  <td><div class="actions">
+                    <button class="btn btn-ghost btn-sm" data-edit-notice="${n.id}">수정</button>
+                    <button class="btn btn-outline btn-sm" data-del-notice="${n.id}">삭제</button>
+                  </div></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      function renderContests() {
+        const items = window.IYAA.getContests();
+        main.innerHTML = `
+          <div class="page-head">
+            <h2>대회 관리</h2>
+            <button class="btn btn-primary btn-sm" data-new-contest>+ 새 대회</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>대회명</th><th style="width:100px;">상태</th><th style="width:160px;">부문</th><th style="width:200px;">기간</th><th style="width:160px;text-align:right;">액션</th></tr>
+            </thead>
+            <tbody>
+              ${items.map((c) => `
+                <tr>
+                  <td>${escapeHtml(c.title)}</td>
+                  <td><span class="status-badge ${c.status}">${statusLabel[c.status]}</span></td>
+                  <td>${escapeHtml(c.category)}</td>
+                  <td>${escapeHtml(c.period)}</td>
+                  <td><div class="actions">
+                    <button class="btn btn-ghost btn-sm" data-edit-contest="${c.id}">수정</button>
+                    <button class="btn btn-outline btn-sm" data-del-contest="${c.id}">삭제</button>
+                  </div></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      function renderUsers() {
+        const users = window.IYAA.getUsers();
+        main.innerHTML = `
+          <div class="page-head">
+            <h2>회원 관리</h2>
+            <p style="color:var(--muted);font-size:13px;">총 ${users.length}명</p>
+          </div>
+          <table class="table">
+            <thead>
+              <tr><th>이름</th><th>이메일</th><th style="width:100px;">국가</th><th style="width:100px;">출생연도</th><th style="width:100px;">역할</th><th style="width:160px;">가입일</th><th style="width:120px;text-align:right;">액션</th></tr>
+            </thead>
+            <tbody>
+              ${users.map((u) => `
+                <tr>
+                  <td>${escapeHtml(u.name)}</td>
+                  <td>${escapeHtml(u.email)}</td>
+                  <td>${escapeHtml(u.country || "-")}</td>
+                  <td>${u.birthYear || "-"}</td>
+                  <td><span class="status-badge ${u.role === "admin" ? "upcoming" : ""}">${u.role === "admin" ? "관리자" : "회원"}</span></td>
+                  <td>${u.createdAt ? u.createdAt.slice(0, 10) : "-"}</td>
+                  <td><div class="actions">
+                    ${u.role === "admin" ? '' : `<button class="btn btn-outline btn-sm" data-del-user="${u.id}">삭제</button>`}
+                  </div></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      // Event delegation for admin actions.
+      main.addEventListener("click", (e) => {
+        const t = e.target;
+        if (t.matches("[data-new-notice]")) openNoticeModal();
+        else if (t.matches("[data-edit-notice]")) openNoticeModal(t.dataset.editNotice);
+        else if (t.matches("[data-del-notice]")) delNotice(t.dataset.delNotice);
+        else if (t.matches("[data-new-contest]")) openContestModal();
+        else if (t.matches("[data-edit-contest]")) openContestModal(t.dataset.editContest);
+        else if (t.matches("[data-del-contest]")) delContest(t.dataset.delContest);
+        else if (t.matches("[data-del-user]")) delUser(t.dataset.delUser);
+      });
+
+      // Notice modal.
+      function openNoticeModal(id) {
+        editingNoticeId = id || null;
+        const modal = noticeModal;
+        modal.querySelector("[data-title]").textContent = id ? "공지 수정" : "공지 작성";
+        const items = window.IYAA.getNotices();
+        const n = id ? items.find((x) => x.id === id) : null;
+        modal.querySelector("[data-n-title]").value = n ? n.title : "";
+        modal.querySelector("[data-n-cat]").value = n ? n.category : "notice";
+        modal.querySelector("[data-n-date]").value = n ? n.date : new Date().toISOString().slice(0, 10);
+        modal.querySelector("[data-n-body]").value = n ? n.body : "";
+        modal.classList.add("open");
+      }
+      noticeModal.addEventListener("click", (e) => {
+        if (e.target === noticeModal || e.target.matches("[data-close]")) noticeModal.classList.remove("open");
+        if (e.target.matches("[data-n-save]")) saveNotice();
+      });
+      function saveNotice() {
+        const items = window.IYAA.getNotices();
+        const title = noticeModal.querySelector("[data-n-title]").value.trim();
+        if (!title) { alert("제목을 입력해 주세요."); return; }
+        const payload = {
+          category: noticeModal.querySelector("[data-n-cat]").value,
+          title,
+          date: noticeModal.querySelector("[data-n-date]").value,
+          body: noticeModal.querySelector("[data-n-body]").value.trim(),
+          author: user.name,
+        };
+        if (editingNoticeId) {
+          const i = items.findIndex((x) => x.id === editingNoticeId);
+          items[i] = { ...items[i], ...payload };
+        } else {
+          items.unshift({ id: "n-" + Date.now().toString(36), ...payload });
+        }
+        window.IYAA.setNotices(items);
+        noticeModal.classList.remove("open");
+        renderNotices();
+      }
+      function delNotice(id) {
+        if (!confirm("이 공지를 삭제할까요?")) return;
+        const items = window.IYAA.getNotices().filter((x) => x.id !== id);
+        window.IYAA.setNotices(items);
+        renderNotices();
+      }
+
+      // Contest modal.
+      function openContestModal(id) {
+        editingContestId = id || null;
+        const items = window.IYAA.getContests();
+        const c = id ? items.find((x) => x.id === id) : null;
+        contestModal.querySelector("[data-title]").textContent = id ? "대회 수정" : "대회 등록";
+        contestModal.querySelector("[data-c-title]").value = c ? c.title : "";
+        contestModal.querySelector("[data-c-cat]").value = c ? c.category : "";
+        contestModal.querySelector("[data-c-status]").value = c ? c.status : "open";
+        contestModal.querySelector("[data-c-period]").value = c ? c.period : "";
+        contestModal.querySelector("[data-c-award]").value = c ? c.award : "";
+        contestModal.querySelector("[data-c-summary]").value = c ? c.summary : "";
+        contestModal.querySelector("[data-c-detail]").value = c ? c.detail : "";
+        contestModal.classList.add("open");
+      }
+      contestModal.addEventListener("click", (e) => {
+        if (e.target === contestModal || e.target.matches("[data-close]")) contestModal.classList.remove("open");
+        if (e.target.matches("[data-c-save]")) saveContest();
+      });
+      function saveContest() {
+        const items = window.IYAA.getContests();
+        const title = contestModal.querySelector("[data-c-title]").value.trim();
+        if (!title) { alert("대회명을 입력해 주세요."); return; }
+        const payload = {
+          title,
+          kicker: "IYAA Program",
+          status: contestModal.querySelector("[data-c-status]").value,
+          category: contestModal.querySelector("[data-c-cat]").value.trim(),
+          period: contestModal.querySelector("[data-c-period]").value.trim(),
+          award: contestModal.querySelector("[data-c-award]").value.trim(),
+          summary: contestModal.querySelector("[data-c-summary]").value.trim(),
+          detail: contestModal.querySelector("[data-c-detail]").value.trim(),
+          cover: "primary",
+        };
+        if (editingContestId) {
+          const i = items.findIndex((x) => x.id === editingContestId);
+          items[i] = { ...items[i], ...payload };
+        } else {
+          items.unshift({ id: "c-" + Date.now().toString(36), ...payload });
+        }
+        window.IYAA.setContests(items);
+        contestModal.classList.remove("open");
+        renderContests();
+      }
+      function delContest(id) {
+        if (!confirm("이 대회를 삭제할까요?")) return;
+        const items = window.IYAA.getContests().filter((x) => x.id !== id);
+        window.IYAA.setContests(items);
+        renderContests();
+      }
+
+      function delUser(id) {
+        if (!confirm("이 회원을 삭제할까요?")) return;
+        const items = window.IYAA.getUsers().filter((x) => x.id !== id);
+        window.IYAA.setUsers(items);
+        renderUsers();
+      }
+
+      // Initial view.
+      render("dashboard");
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>대회 안내 | IYAA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="contest">
+  <div data-header></div>
+
+  <main>
+    <section class="hero" style="padding-bottom: 24px;">
+      <div class="container">
+        <span class="eyebrow">Contests & Programs</span>
+        <h1>대회 안내</h1>
+        <p>매년 진행되는 IYAA 국제 공모전과 시즌별 챌린지, 창작 지원 프로그램을 소개합니다.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 24px;">
+      <div class="container">
+        <div class="filter-row">
+          <div class="tabs" data-tabs>
+            <button class="tab active" data-status="all">전체</button>
+            <button class="tab" data-status="open">진행 중</button>
+            <button class="tab" data-status="upcoming">예정</button>
+            <button class="tab" data-status="closed">종료</button>
+          </div>
+        </div>
+
+        <div class="grid grid-2" data-contest-list></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" data-modal>
+    <div class="modal">
+      <button class="close" data-modal-close aria-label="닫기">×</button>
+      <div class="meta" data-modal-meta></div>
+      <h2 data-modal-title></h2>
+      <div data-modal-body style="margin-top:16px;"></div>
+      <div style="margin-top: 24px;">
+        <a class="btn btn-primary" data-modal-cta href="#">참가 신청</a>
+      </div>
+    </div>
+  </div>
+
+  <div data-footer></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (function () {
+      const listEl = document.querySelector("[data-contest-list]");
+      const tabsEl = document.querySelector("[data-tabs]");
+      const modal = document.querySelector("[data-modal]");
+      let status = "all";
+
+      const statusLabel = { open: "진행 중", upcoming: "예정", closed: "종료" };
+      const all = window.IYAA.getContests();
+
+      function render() {
+        const items = all.filter((c) => status === "all" || c.status === status);
+        listEl.innerHTML = items
+          .map(
+            (c) => `
+          <article class="contest-card">
+            <div class="cover ${c.cover === "alt" ? "alt" : c.cover === "dark" ? "dark" : ""}">
+              <div class="kicker">${escapeHtml(c.kicker)}</div>
+              <div class="title">${escapeHtml(c.title)}</div>
+            </div>
+            <div class="body">
+              <div class="meta">
+                <span class="status-badge ${c.status}">${statusLabel[c.status]}</span>
+                <span>${escapeHtml(c.category)}</span>
+                <span>${escapeHtml(c.period)}</span>
+              </div>
+              <p>${escapeHtml(c.summary)}</p>
+              <button class="btn btn-outline btn-sm" data-open="${c.id}">자세히 보기</button>
+            </div>
+          </article>`
+          )
+          .join("");
+      }
+
+      tabsEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".tab");
+        if (!btn) return;
+        tabsEl.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        btn.classList.add("active");
+        status = btn.dataset.status;
+        render();
+      });
+
+      listEl.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-open]");
+        if (!btn) return;
+        const c = all.find((x) => x.id === btn.dataset.open);
+        if (!c) return;
+        modal.querySelector("[data-modal-title]").textContent = c.title;
+        modal.querySelector("[data-modal-meta]").textContent = `${statusLabel[c.status]} · ${c.category} · ${c.period}`;
+        modal.querySelector("[data-modal-body]").innerHTML = `
+          <p style="margin-bottom:14px;">${escapeHtml(c.summary)}</p>
+          <p style="margin-bottom:14px;">${escapeHtml(c.detail)}</p>
+          <ul style="color:var(--ink-soft);font-size:14px;padding-left:18px;line-height:1.8;">
+            <li><b>기간</b> ${escapeHtml(c.period)}</li>
+            <li><b>부문</b> ${escapeHtml(c.category)}</li>
+            <li><b>시상</b> ${escapeHtml(c.award)}</li>
+          </ul>
+        `;
+        const cta = modal.querySelector("[data-modal-cta]");
+        if (c.status === "closed") {
+          cta.textContent = "아카이브 보기";
+          cta.classList.add("btn-ghost");
+          cta.classList.remove("btn-primary");
+        } else {
+          cta.textContent = c.status === "upcoming" ? "알림 신청" : "참가 신청";
+          cta.classList.add("btn-primary");
+          cta.classList.remove("btn-ghost");
+        }
+        modal.classList.add("open");
+      });
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.matches("[data-modal-close]")) {
+          modal.classList.remove("open");
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

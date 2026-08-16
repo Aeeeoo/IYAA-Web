@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>로그인 | IYAA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="login">
+  <div data-header></div>
+
+  <main>
+    <div class="form-wrap">
+      <div class="form-card">
+        <h1>로그인</h1>
+        <p class="sub">IYAA 회원 서비스에 로그인하세요.</p>
+
+        <div class="alert alert-info" style="font-size:13px;">
+          <b>데모 관리자 계정</b> · admin@iyaa.org / admin1234
+        </div>
+
+        <div class="alert alert-danger" id="err" style="display:none;"></div>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="email">이메일</label>
+            <input id="email" type="email" placeholder="you@example.com" required autocomplete="username" />
+          </div>
+          <div class="field">
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" required autocomplete="current-password" />
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">로그인</button>
+        </form>
+
+        <div class="form-footer">
+          아직 회원이 아니신가요? <a href="signup.html">회원가입</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div data-footer></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (function () {
+      const form = document.getElementById("login-form");
+      const errBox = document.getElementById("err");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        errBox.style.display = "none";
+        const email = form.email.value.trim();
+        const password = form.password.value;
+        const res = window.Auth.login(email, password);
+        if (!res.ok) {
+          errBox.textContent = res.error;
+          errBox.style.display = "block";
+          return;
+        }
+        if (res.user.role === "admin") {
+          location.href = "admin.html";
+        } else {
+          location.href = "index.html";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

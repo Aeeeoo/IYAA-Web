@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IYAA — International Young Authors Association</title>
+  <meta name="description" content="IYAA는 전 세계 청년 작가들이 이야기로 연결되는 국제 창작·스토리텔링 협회입니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="home">
+  <div data-header></div>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <span class="eyebrow">International Young Authors Association</span>
+        <h1>이야기가 세계를 잇는다.<br />청년 작가를 위한 국제 창작 협회, IYAA.</h1>
+        <p>IYAA는 전 세계 만 13세~24세 청년 작가들이 언어와 국경을 넘어 서로의 이야기를 발견하고, 함께 성장할 수 있도록 대회·워크숍·출판·번역 지원을 운영합니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="signup.html">회원가입</a>
+          <a class="btn btn-outline" href="about.html">협회 소개</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="stat-row">
+          <div class="stat"><div class="num">42</div><div class="label">Countries</div></div>
+          <div class="stat"><div class="num">3,800+</div><div class="label">Young Authors</div></div>
+          <div class="stat"><div class="num">57</div><div class="label">Published Works</div></div>
+          <div class="stat"><div class="num">12</div><div class="label">Global Partners</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">What we do</div>
+            <h2>청년 작가와 이야기가 만나는 세 개의 프로그램</h2>
+          </div>
+          <p>공모전, 창작 교육, 국제 교류. IYAA는 세 개의 축으로 청년 작가의 데뷔부터 성장까지 함께합니다.</p>
+        </div>
+        <div class="grid grid-3">
+          <article class="card">
+            <div class="meta">01 · Contest</div>
+            <h3>국제 문학상 & 공모전</h3>
+            <p>매년 봄·가을 두 차례의 국제 공모전과 상시 챌린지를 통해 신진 청년 작가를 발굴합니다.</p>
+            <a class="card-cta" href="contest.html">대회 안내 보기 →</a>
+          </article>
+          <article class="card">
+            <div class="meta">02 · Education</div>
+            <h3>창작 워크숍 & 멘토링</h3>
+            <p>등단 작가·편집자와 함께하는 온·오프라인 워크숍과 1:1 멘토링 프로그램을 운영합니다.</p>
+            <a class="card-cta" href="notice.html">교육 공지 보기 →</a>
+          </article>
+          <article class="card">
+            <div class="meta">03 · Global</div>
+            <h3>번역 · 국제 출판 지원</h3>
+            <p>수상작을 영어·프랑스어·스페인어 등으로 번역하고 국제 매거진에 소개합니다.</p>
+            <a class="card-cta" href="about.html">협회 소개 보기 →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Latest</div>
+            <h2>최근 공지</h2>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="notice.html">전체 공지 →</a>
+        </div>
+        <div class="notice-list" data-latest-notices></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-footer></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (function () {
+      const slot = document.querySelector("[data-latest-notices]");
+      const items = window.IYAA.getNotices().slice(0, 4);
+      slot.innerHTML = items
+        .map(
+          (n) => `
+        <a class="notice-item" href="notice.html#${n.id}">
+          <span class="tag ${n.category === "important" ? "important" : ""}">${labelOf(n.category)}</span>
+          <span class="title">${escapeHtml(n.title)}</span>
+          <span class="date">${n.date}</span>
+          <span class="author">${escapeHtml(n.author)}</span>
+        </a>`
+        )
+        .join("");
+      function labelOf(c) {
+        return { important: "중요", notice: "공지", event: "행사", press: "보도" }[c] || "공지";
+      }
+    })();
+  </script>
+</body>
+</html>
