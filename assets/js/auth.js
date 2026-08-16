@@ -34,7 +34,8 @@
       name: data.name,
       role: "member",
       country: data.country,
-      birthYear: Number(data.birthYear),
+      childName: data.childName || "",
+      childBirthYear: data.childBirthYear ? Number(data.childBirthYear) : null,
       createdAt: new Date().toISOString(),
     };
     users.push(user);
