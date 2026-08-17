@@ -27,7 +27,7 @@
       <header class="site-header">
         <div class="container">
           <a class="brand" href="index.html" aria-label="IYAA 홈">
-            <img class="brand-logo" src="International Young Authors 로고.png" alt="IYAA" />
+            <img class="brand-logo" src="logo.png" alt="IYAA" />
           </a>
           <nav class="nav" data-nav>
             <a href="about.html" data-nav-key="about">협회 소개</a>
