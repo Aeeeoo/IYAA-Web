@@ -38,31 +38,29 @@
   }
 
   async function register(data) {
-    // 1) Supabase Auth로 계정 생성
+    // Supabase Auth로 계정 생성. 부가 정보는 raw_user_meta_data로 넘겨서
+    // DB 트리거(handle_new_user)가 profiles 행을 자동 생성하게 한다.
+    // 이메일 인증 전에는 세션이 없어서 클라이언트에서 profiles insert가
+    // RLS에 걸리기 때문에 트리거 방식이 필요함.
     const { data: authData, error: authError } = await sb.auth.signUp({
       email: data.email,
       password: data.password,
+      options: {
+        emailRedirectTo: `${location.origin}/verified.html`,
+        data: {
+          name: data.name,
+          child_name: data.childName || null,
+          child_birth_year: data.childBirthYear || null,
+          country: data.country || null,
+        },
+      },
     });
     if (authError) return { ok: false, error: authError.message };
     if (!authData.user) return { ok: false, error: "가입에 실패했습니다." };
 
-    // 2) profiles 테이블에 부가 정보 저장. session이 자동 생성되어 auth.uid()==user.id
-    //    이므로 profiles의 insert RLS 정책을 통과함.
-    const { error: profileError } = await sb.from("profiles").insert({
-      id: authData.user.id,
-      email: data.email,
-      name: data.name,
-      child_name: data.childName || null,
-      child_birth_year: data.childBirthYear || null,
-      country: data.country || null,
-      role: "member",
-    });
-    if (profileError) {
-      return { ok: false, error: "프로필 저장 실패: " + profileError.message };
-    }
-
-    const user = await currentUser();
-    return { ok: true, user };
+    // 이메일 인증이 켜져있으면 session이 null. 인증 후 자동 로그인.
+    const needsEmailConfirm = !authData.session;
+    return { ok: true, needsEmailConfirm, email: data.email };
   }
 
   async function requireAdmin(redirect) {

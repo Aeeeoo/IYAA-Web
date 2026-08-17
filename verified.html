@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <title>이메일 인증 완료 | IAYA</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="signup">
+  <div data-header></div>
+
+  <main>
+    <div class="form-wrap">
+      <div class="form-card" style="text-align:center;">
+        <div id="loading">
+          <div style="font-size:40px; margin-bottom:16px;">⏳</div>
+          <h1 style="font-size:1.4rem; margin-bottom:8px;">인증 확인 중…</h1>
+          <p class="sub">잠시만 기다려주세요.</p>
+        </div>
+
+        <div id="success" style="display:none;">
+          <div style="font-size:56px; margin-bottom:16px;">✅</div>
+          <h1 style="font-size:1.6rem; margin-bottom:10px;">이메일 인증이 완료되었습니다</h1>
+          <p class="sub" id="welcome" style="margin-bottom:26px;">IAYA에 오신 것을 환영합니다.</p>
+          <a class="btn btn-primary btn-block" href="index.html">홈으로 이동</a>
+        </div>
+
+        <div id="failed" style="display:none;">
+          <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+          <h1 style="font-size:1.4rem; margin-bottom:10px;">인증에 실패했습니다</h1>
+          <p class="sub" id="fail-msg" style="margin-bottom:24px;">인증 링크가 만료되었거나 잘못된 링크일 수 있습니다.</p>
+          <a class="btn btn-outline btn-block" href="signup.html">회원가입 다시 하기</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div data-footer></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (async function () {
+      // Supabase SDK가 URL의 access_token(#또는 ?)을 자동으로 파싱해 세션을
+      // 세팅한다. 이 함수는 그 처리가 끝날 때까지 대기.
+      // 짧은 폴링으로 세션 등장을 확인.
+      const started = Date.now();
+      let user = null;
+      while (Date.now() - started < 4000) {
+        const { data: { session } } = await window.sb.auth.getSession();
+        if (session) {
+          user = await window.Auth.currentUser();
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 200));
+      }
+
+      document.getElementById("loading").style.display = "none";
+      if (user) {
+        document.getElementById("welcome").textContent =
+          `${user.name || user.email}님, IAYA에 오신 것을 환영합니다.`;
+        document.getElementById("success").style.display = "block";
+      } else {
+        document.getElementById("failed").style.display = "block";
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -75,7 +75,12 @@
 
           <div class="field" id="f-agree" style="display:flex;align-items:center;gap:8px;">
             <input id="agree" name="agree" type="checkbox" style="width:auto;" required />
-            <label for="agree" style="margin:0;">이용약관 및 개인정보 처리방침에 동의합니다.</label>
+            <label for="agree" style="margin:0;">
+              <a href="terms.html" target="_blank" style="color:var(--navy);text-decoration:underline;">이용약관</a>
+              및
+              <a href="privacy.html" target="_blank" style="color:var(--navy);text-decoration:underline;">개인정보 처리방침</a>
+              에 동의합니다.
+            </label>
           </div>
 
           <button class="btn btn-primary btn-block" type="submit">회원가입</button>
@@ -83,6 +88,21 @@
 
         <div class="form-footer">
           이미 계정이 있으신가요? <a href="login.html">로그인</a>
+        </div>
+
+        <!-- 회원가입 성공 후 표시되는 안내 (기본 숨김) -->
+        <div id="check-email" style="display:none; text-align:center; padding:20px 0;">
+          <div style="font-size:48px; margin-bottom:16px;">📮</div>
+          <h2 style="font-size:1.4rem; margin-bottom:12px;">이메일을 확인해주세요</h2>
+          <p style="color:var(--ink-soft); font-size:14px; line-height:1.7;">
+            <b id="check-email-addr" style="color:var(--ink);"></b> 로<br />
+            인증 메일을 발송했습니다.<br /><br />
+            메일함(스팸함도 함께)에서 IAYA 인증 링크를<br />
+            클릭하시면 가입이 완료됩니다.
+          </p>
+          <div style="margin-top:24px;">
+            <a class="btn btn-outline" href="login.html">로그인 페이지로</a>
+          </div>
         </div>
       </div>
     </div>
@@ -164,8 +184,18 @@
           errBox.style.display = "block";
           return;
         }
-        alert("회원가입이 완료되었습니다. IAYA에 오신 것을 환영합니다.");
-        location.href = "index.html";
+
+        if (res.needsEmailConfirm) {
+          // 폼 · 하단 링크 숨기고 "메일 확인" 패널 표시.
+          form.style.display = "none";
+          document.querySelector(".form-footer").style.display = "none";
+          document.getElementById("check-email-addr").textContent = res.email;
+          document.getElementById("check-email").style.display = "block";
+        } else {
+          // 이메일 인증이 꺼져있으면 바로 로그인 상태로.
+          alert("회원가입이 완료되었습니다. IAYA에 오신 것을 환영합니다.");
+          location.href = "index.html";
+        }
       });
     })();
   </script>
