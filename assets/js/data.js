@@ -2,22 +2,22 @@
 // prototype survives page reloads without a backend.
 (function () {
   const KEYS = {
-    users: "iyaa.users",
-    session: "iyaa.session",
-    notices: "iyaa.notices",
-    contests: "iyaa.contests",
-    seeded: "iyaa.seeded.v4",
+    users: "iaya.users",
+    session: "iaya.session",
+    notices: "iaya.notices",
+    contests: "iaya.contests",
+    seeded: "iaya.seeded.v4",
   };
 
   const seedNotices = [
     {
       id: "n-welcome",
       category: "notice",
-      title: "IYAA 홈페이지가 오픈되었습니다",
+      title: "IAYA 홈페이지가 오픈되었습니다",
       date: "2026-08-17",
-      author: "IYAA 사무국",
+      author: "IAYA 사무국",
       body:
-        "미취학 아동을 위한 국제 창작·스토리텔링 협회 IYAA의 홈페이지가 오픈되었습니다. 프로그램과 공지사항은 준비되는 대로 순차적으로 안내될 예정입니다.",
+        "미취학 아동을 위한 국제 창작·스토리텔링 협회 IAYA의 홈페이지가 오픈되었습니다. 프로그램과 공지사항은 준비되는 대로 순차적으로 안내될 예정입니다.",
       views: 0,
     },
   ];
@@ -26,11 +26,11 @@
 
   const seedAdmin = {
     id: "u-admin",
-    email: "admin@iyaa.org",
+    email: "admin@iaya.org",
     // 프로토타입용. 정적 파일이라 클라이언트에서 조회 가능함을 인지하고
     // 실제 서비스로 전환 시 서버 사이드 인증으로 반드시 교체할 것.
-    password: "IYAA@Admin2026!",
-    name: "IYAA Admin",
+    password: "IAYA@Admin2026!",
+    name: "IAYA Admin",
     role: "admin",
     country: "KR",
     birthYear: 1990,
@@ -61,7 +61,7 @@
     localStorage.setItem(KEYS.seeded, "1");
   }
 
-  window.IYAA = {
+  window.IAYA = {
     KEYS,
     read,
     write,

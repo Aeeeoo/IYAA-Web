@@ -1,6 +1,6 @@
-# IYAA — International Young Authors Association
+# IAYA — International Association for Young Authors
 
-전 세계 미취학 아동(만 3~7세)을 위한 국제 창작 · 스토리텔링 협회 IYAA의 공식 홈페이지 프로토타입입니다. 회원가입은 아동을 대신해 보호자가 진행하는 구조입니다.
+전 세계 미취학 아동(만 3~7세)을 위한 국제 창작 · 스토리텔링 협회 IAYA의 공식 홈페이지 프로토타입입니다. 회원가입은 아동을 대신해 보호자가 진행하는 구조입니다.
 
 정적 HTML/CSS/JS로만 구성되어 있으며, 회원가입 · 로그인 · 관리자 기능은 브라우저 `localStorage`를 이용한 프론트엔드 프로토타입입니다. 실제 서비스 전환 시 백엔드(예: Supabase / Firebase / 자체 API)로 교체할 수 있게 인증 로직은 `assets/js/auth.js` 한 곳으로 모아 두었습니다.
 
@@ -43,10 +43,10 @@ npx serve .
 
 첫 방문 시 `assets/js/data.js`가 다음 항목을 `localStorage`에 시드합니다.
 
-- `iyaa.users` — 회원 목록 (관리자 계정 포함)
-- `iyaa.notices` — 공지사항
-- `iyaa.contests` — 대회
-- `iyaa.session` — 현재 로그인 세션
+- `iaya.users` — 회원 목록 (관리자 계정 포함)
+- `iaya.notices` — 공지사항
+- `iaya.contests` — 대회
+- `iaya.session` — 현재 로그인 세션
 
 시드를 초기화하고 싶다면 브라우저 콘솔에서:
 
@@ -58,7 +58,7 @@ location.reload();
 ## 디렉터리 구조
 
 ```
-IYAA-Web/
+IAYA-Web/
 ├── index.html
 ├── about.html
 ├── notice.html
@@ -87,7 +87,7 @@ IYAA-Web/
 1. GitHub → 이 저장소 → **Settings → Pages**
 2. **Source** — `Deploy from a branch`
 3. **Branch** — `main` / `/(root)` → Save
-4. 1~2분 후 `https://<username>.github.io/IYAA-Web/` 에서 접속
+4. 1~2분 후 `https://<username>.github.io/IAYA-Web/` 에서 접속
 
 ## 다음 할 일 (Roadmap)
 
@@ -99,4 +99,4 @@ IYAA-Web/
 
 ## License
 
-© International Young Authors Association (IYAA). All rights reserved.
+© International Association for Young Authors (IAYA). All rights reserved.

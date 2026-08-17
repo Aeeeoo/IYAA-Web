@@ -26,8 +26,8 @@
     slot.innerHTML = `
       <header class="site-header">
         <div class="container">
-          <a class="brand" href="index.html" aria-label="IYAA 홈">
-            <img class="brand-logo" src="logo.png" alt="IYAA" />
+          <a class="brand" href="index.html" aria-label="IAYA 홈">
+            <img class="brand-logo" src="logo.png" alt="IAYA" />
           </a>
           <nav class="nav" data-nav>
             <a href="about.html" data-nav-key="about">협회 소개</a>
@@ -57,13 +57,13 @@
       <footer class="site-footer">
         <div class="container">
           <div>
-            © ${year} International Young Authors Association (IYAA)
+            © ${year} International Association for Young Authors (IAYA)
           </div>
           <div class="foot-links">
             <a href="about.html">협회 소개</a>
             <a href="notice.html">공지사항</a>
             <a href="contest.html">대회 안내</a>
-            <a href="mailto:hello@iyaa.org">문의</a>
+            <a href="mailto:hello@iaya.org">문의</a>
           </div>
         </div>
       </footer>

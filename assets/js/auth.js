@@ -1,20 +1,20 @@
 // Session + role helpers. Auth is intentionally simple (localStorage) —
 // swap out these functions when a real backend lands.
 (function () {
-  const K = window.IYAA.KEYS;
+  const K = window.IAYA.KEYS;
 
   function currentUser() {
-    const session = window.IYAA.read(K.session, null);
+    const session = window.IAYA.read(K.session, null);
     if (!session) return null;
-    return window.IYAA.getUsers().find((u) => u.id === session.userId) || null;
+    return window.IAYA.getUsers().find((u) => u.id === session.userId) || null;
   }
 
   function login(email, password) {
-    const user = window.IYAA.getUsers().find(
+    const user = window.IAYA.getUsers().find(
       (u) => u.email.toLowerCase() === String(email).toLowerCase() && u.password === password
     );
     if (!user) return { ok: false, error: "이메일 또는 비밀번호가 올바르지 않습니다." };
-    window.IYAA.write(K.session, { userId: user.id, at: new Date().toISOString() });
+    window.IAYA.write(K.session, { userId: user.id, at: new Date().toISOString() });
     return { ok: true, user };
   }
 
@@ -23,7 +23,7 @@
   }
 
   function register(data) {
-    const users = window.IYAA.getUsers();
+    const users = window.IAYA.getUsers();
     if (users.some((u) => u.email.toLowerCase() === data.email.toLowerCase())) {
       return { ok: false, error: "이미 등록된 이메일입니다." };
     }
@@ -39,8 +39,8 @@
       createdAt: new Date().toISOString(),
     };
     users.push(user);
-    window.IYAA.setUsers(users);
-    window.IYAA.write(K.session, { userId: user.id, at: new Date().toISOString() });
+    window.IAYA.setUsers(users);
+    window.IAYA.write(K.session, { userId: user.id, at: new Date().toISOString() });
     return { ok: true, user };
   }
 

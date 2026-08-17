@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>관리자 | IYAA</title>
+  <title>관리자 | IAYA</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body data-nav="admin">
@@ -128,9 +128,9 @@
       }
 
       function renderDashboard() {
-        const notices = window.IYAA.getNotices();
-        const contests = window.IYAA.getContests();
-        const users = window.IYAA.getUsers();
+        const notices = window.IAYA.getNotices();
+        const contests = window.IAYA.getContests();
+        const users = window.IAYA.getUsers();
         const openContests = contests.filter((c) => c.status === "open").length;
         main.innerHTML = `
           <div class="page-head">
@@ -159,7 +159,7 @@
       }
 
       function renderNotices() {
-        const items = window.IYAA.getNotices();
+        const items = window.IAYA.getNotices();
         main.innerHTML = `
           <div class="page-head">
             <h2>공지사항 관리</h2>
@@ -188,7 +188,7 @@
       }
 
       function renderContests() {
-        const items = window.IYAA.getContests();
+        const items = window.IAYA.getContests();
         main.innerHTML = `
           <div class="page-head">
             <h2>대회 관리</h2>
@@ -217,7 +217,7 @@
       }
 
       function renderUsers() {
-        const users = window.IYAA.getUsers();
+        const users = window.IAYA.getUsers();
         main.innerHTML = `
           <div class="page-head">
             <h2>회원 관리</h2>
@@ -264,7 +264,7 @@
         editingNoticeId = id || null;
         const modal = noticeModal;
         modal.querySelector("[data-title]").textContent = id ? "공지 수정" : "공지 작성";
-        const items = window.IYAA.getNotices();
+        const items = window.IAYA.getNotices();
         const n = id ? items.find((x) => x.id === id) : null;
         modal.querySelector("[data-n-title]").value = n ? n.title : "";
         modal.querySelector("[data-n-cat]").value = n ? n.category : "notice";
@@ -277,7 +277,7 @@
         if (e.target.matches("[data-n-save]")) saveNotice();
       });
       function saveNotice() {
-        const items = window.IYAA.getNotices();
+        const items = window.IAYA.getNotices();
         const title = noticeModal.querySelector("[data-n-title]").value.trim();
         if (!title) { alert("제목을 입력해 주세요."); return; }
         const payload = {
@@ -293,21 +293,21 @@
         } else {
           items.unshift({ id: "n-" + Date.now().toString(36), ...payload });
         }
-        window.IYAA.setNotices(items);
+        window.IAYA.setNotices(items);
         noticeModal.classList.remove("open");
         renderNotices();
       }
       function delNotice(id) {
         if (!confirm("이 공지를 삭제할까요?")) return;
-        const items = window.IYAA.getNotices().filter((x) => x.id !== id);
-        window.IYAA.setNotices(items);
+        const items = window.IAYA.getNotices().filter((x) => x.id !== id);
+        window.IAYA.setNotices(items);
         renderNotices();
       }
 
       // Contest modal.
       function openContestModal(id) {
         editingContestId = id || null;
-        const items = window.IYAA.getContests();
+        const items = window.IAYA.getContests();
         const c = id ? items.find((x) => x.id === id) : null;
         contestModal.querySelector("[data-title]").textContent = id ? "대회 수정" : "대회 등록";
         contestModal.querySelector("[data-c-title]").value = c ? c.title : "";
@@ -324,12 +324,12 @@
         if (e.target.matches("[data-c-save]")) saveContest();
       });
       function saveContest() {
-        const items = window.IYAA.getContests();
+        const items = window.IAYA.getContests();
         const title = contestModal.querySelector("[data-c-title]").value.trim();
         if (!title) { alert("대회명을 입력해 주세요."); return; }
         const payload = {
           title,
-          kicker: "IYAA Program",
+          kicker: "IAYA Program",
           status: contestModal.querySelector("[data-c-status]").value,
           category: contestModal.querySelector("[data-c-cat]").value.trim(),
           period: contestModal.querySelector("[data-c-period]").value.trim(),
@@ -344,21 +344,21 @@
         } else {
           items.unshift({ id: "c-" + Date.now().toString(36), ...payload });
         }
-        window.IYAA.setContests(items);
+        window.IAYA.setContests(items);
         contestModal.classList.remove("open");
         renderContests();
       }
       function delContest(id) {
         if (!confirm("이 대회를 삭제할까요?")) return;
-        const items = window.IYAA.getContests().filter((x) => x.id !== id);
-        window.IYAA.setContests(items);
+        const items = window.IAYA.getContests().filter((x) => x.id !== id);
+        window.IAYA.setContests(items);
         renderContests();
       }
 
       function delUser(id) {
         if (!confirm("이 회원을 삭제할까요?")) return;
-        const items = window.IYAA.getUsers().filter((x) => x.id !== id);
-        window.IYAA.setUsers(items);
+        const items = window.IAYA.getUsers().filter((x) => x.id !== id);
+        window.IAYA.setUsers(items);
         renderUsers();
       }
 
