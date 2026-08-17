@@ -6,8 +6,8 @@
 //
 // anon 키는 공개해도 안전한 키입니다 (RLS 정책이 실제 접근 제어를 함).
 
-window.SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
-window.SUPABASE_ANON_KEY = "YOUR-ANON-KEY";
+window.SUPABASE_URL = "https://yggzqaoowpfmjddwwqea.supabase.co";
+window.SUPABASE_ANON_KEY = "sb_publishable_-JdsGtya7J4ZUab-YVcaMg_V48PxCCp";
 
 // Supabase JS SDK가 이 스크립트보다 먼저 로드되어야 합니다.
 // (HTML의 <head>에서 supabase-js CDN → 이 파일 순서)
