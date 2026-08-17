@@ -1,28 +1,18 @@
 // Shared UI wiring: header rendering, nav active state, mobile toggle.
 (function () {
-  document.addEventListener("DOMContentLoaded", function () {
-    renderHeader();
+  document.addEventListener("DOMContentLoaded", async function () {
+    await renderHeader();
     renderFooter();
     highlightActiveNav();
     wireMobileMenu();
   });
 
-  function renderHeader() {
+  async function renderHeader() {
     const slot = document.querySelector("[data-header]");
     if (!slot) return;
-    const user = window.Auth ? window.Auth.currentUser() : null;
 
-    const authNav = user
-      ? `
-        <span style="font-size:13px;color:var(--muted);">${escapeHtml(user.name)}${user.role === "admin" ? " · 관리자" : ""}</span>
-        ${user.role === "admin" ? `<a class="btn btn-ghost btn-sm" href="admin.html">관리자</a>` : ""}
-        <button class="btn btn-outline btn-sm" data-logout>로그아웃</button>
-      `
-      : `
-        <a class="btn btn-ghost btn-sm" href="login.html">로그인</a>
-        <a class="btn btn-primary btn-sm" href="signup.html">회원가입</a>
-      `;
-
+    // 헤더는 로그인 상태와 무관한 뼈대를 먼저 그리고, auth 정보는 뒤에서
+    // 채워넣는다. currentUser()가 Supabase 왕복이라 첫 페인트를 안 막게.
     slot.innerHTML = `
       <header class="site-header">
         <div class="container">
@@ -34,16 +24,31 @@
             <a href="notice.html" data-nav-key="notice">공지사항</a>
             <a href="contest.html" data-nav-key="contest">대회 안내</a>
           </nav>
-          <div class="auth-nav" data-auth-nav>${authNav}</div>
+          <div class="auth-nav" data-auth-nav></div>
           <button class="btn btn-ghost btn-sm mobile-menu-btn" data-menu-toggle aria-label="메뉴">☰</button>
         </div>
       </header>
     `;
 
-    const logoutBtn = slot.querySelector("[data-logout]");
+    highlightActiveNav();
+
+    const authSlot = slot.querySelector("[data-auth-nav]");
+    const user = window.Auth ? await window.Auth.currentUser() : null;
+    authSlot.innerHTML = user
+      ? `
+        <span style="font-size:13px;color:var(--muted);">${escapeHtml(user.name)}${user.role === "admin" ? " · 관리자" : ""}</span>
+        ${user.role === "admin" ? `<a class="btn btn-ghost" href="admin.html">관리자</a>` : ""}
+        <button class="btn btn-outline" data-logout>로그아웃</button>
+      `
+      : `
+        <a class="btn btn-ghost" href="login.html">로그인</a>
+        <a class="btn btn-primary" href="signup.html">회원가입</a>
+      `;
+
+    const logoutBtn = authSlot.querySelector("[data-logout]");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", function () {
-        window.Auth.logout();
+      logoutBtn.addEventListener("click", async function () {
+        await window.Auth.logout();
         location.href = "index.html";
       });
     }

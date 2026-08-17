@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
   <title>공지사항 | IAYA</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -28,14 +29,15 @@
 
   <div data-footer></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
-    (function () {
+    (async function () {
       const params = new URLSearchParams(location.search);
       const id = params.get("id");
-      const notices = window.IAYA.getNotices();
       const target = document.querySelector("[data-notice-detail]");
       const catLabel = { important: "중요", notice: "공지", event: "행사", press: "보도" };
 
@@ -48,11 +50,12 @@
       }
 
       if (!id) { notFound("공지 ID가 없습니다."); return; }
+      const notices = await window.IAYA.getNotices();
       const idx = notices.findIndex((n) => n.id === id);
       if (idx === -1) { notFound("해당 공지를 찾을 수 없습니다."); return; }
 
       // Increment view count on load so refresh counts as a new view.
-      const currentViews = window.IAYA.incrementNoticeView(id);
+      const currentViews = await window.IAYA.incrementNoticeView(id);
       const n = notices[idx];
       n.views = currentViews;
       // List order convention: prev = 위쪽 항목 (idx-1), next = 아래쪽 항목 (idx+1).

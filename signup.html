@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
   <title>회원가입 | IAYA</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -89,6 +90,8 @@
 
   <div data-footer></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
@@ -103,7 +106,7 @@
         else el.classList.remove("error");
       }
 
-      form.addEventListener("submit", function (e) {
+      form.addEventListener("submit", async function (e) {
         e.preventDefault();
         errBox.style.display = "none";
 
@@ -152,7 +155,7 @@
 
         if (hasError) return;
 
-        const res = window.Auth.register({
+        const res = await window.Auth.register({
           name, email, password: pw, country,
           childName, childBirthYear: birthYear,
         });

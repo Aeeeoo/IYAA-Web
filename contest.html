@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
   <title>대회 안내 | IAYA</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -27,14 +28,16 @@
 
   <div data-footer></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
-    (function () {
+    (async function () {
       const listEl = document.querySelector("[data-contest-list]");
       const statusLabel = { open: "진행 중", upcoming: "Coming Soon", closed: "종료" };
-      const items = window.IAYA.getContests();
+      const items = await window.IAYA.getContests();
 
       if (!items.length) {
         listEl.innerHTML = `

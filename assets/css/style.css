@@ -151,6 +151,15 @@ p { color: var(--ink-soft); }
 
 .auth-nav { display: flex; gap: 8px; align-items: center; color: var(--ink); }
 
+/* 헤더 안의 로그인/회원가입/관리자/로그아웃 버튼은 네비 링크와 같은 톤/사이즈
+   로 맞춰서 둥근 테두리 없이 각지게 표시. */
+.site-header .btn {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 0;
+}
+
 /* --- Buttons ----------------------------------------------------------- */
 .btn {
   display: inline-flex;

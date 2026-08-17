@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
   <title>관리자 | IAYA</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -92,13 +93,15 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script>
-    (function () {
+    (async function () {
       // Gate. currentUser() must exist and be admin, otherwise redirect.
-      const user = window.Auth.requireAdmin("login.html");
+      const user = await window.Auth.requireAdmin("login.html");
       if (!user) return;
 
       const sideLinks = document.querySelectorAll(".admin-side a[data-view]");
@@ -120,17 +123,20 @@
         });
       });
 
-      function render(view) {
-        if (view === "dashboard") renderDashboard();
-        else if (view === "notices") renderNotices();
-        else if (view === "contests") renderContests();
-        else if (view === "users") renderUsers();
+      async function render(view) {
+        if (view === "dashboard") await renderDashboard();
+        else if (view === "notices") await renderNotices();
+        else if (view === "contests") await renderContests();
+        else if (view === "users") await renderUsers();
       }
 
-      function renderDashboard() {
-        const notices = window.IAYA.getNotices();
-        const contests = window.IAYA.getContests();
-        const users = window.IAYA.getUsers();
+      async function renderDashboard() {
+        main.innerHTML = `<p style="padding:40px 0;color:var(--muted);">불러오는 중…</p>`;
+        const [notices, contests, users] = await Promise.all([
+          window.IAYA.getNotices(),
+          window.IAYA.getContests(),
+          window.IAYA.getUsers(),
+        ]);
         const openContests = contests.filter((c) => c.status === "open").length;
         main.innerHTML = `
           <div class="page-head">
@@ -152,14 +158,15 @@
             </div>
             <div class="card">
               <h3 style="margin-bottom:12px;">최근 회원</h3>
-              ${users.slice(-4).reverse().map((u) => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">${escapeHtml(u.name)} <span style="color:var(--muted);font-size:12px;margin-left:8px;">${escapeHtml(u.email)}</span></div>`).join("")}
+              ${users.slice(0, 4).map((u) => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">${escapeHtml(u.name)} <span style="color:var(--muted);font-size:12px;margin-left:8px;">${escapeHtml(u.email)}</span></div>`).join("")}
             </div>
           </div>
         `;
       }
 
-      function renderNotices() {
-        const items = window.IAYA.getNotices();
+      async function renderNotices() {
+        main.innerHTML = `<p style="padding:40px 0;color:var(--muted);">불러오는 중…</p>`;
+        const items = await window.IAYA.getNotices();
         main.innerHTML = `
           <div class="page-head">
             <h2>공지사항 관리</h2>
@@ -187,8 +194,9 @@
         `;
       }
 
-      function renderContests() {
-        const items = window.IAYA.getContests();
+      async function renderContests() {
+        main.innerHTML = `<p style="padding:40px 0;color:var(--muted);">불러오는 중…</p>`;
+        const items = await window.IAYA.getContests();
         main.innerHTML = `
           <div class="page-head">
             <h2>대회 관리</h2>
@@ -216,8 +224,9 @@
         `;
       }
 
-      function renderUsers() {
-        const users = window.IAYA.getUsers();
+      async function renderUsers() {
+        main.innerHTML = `<p style="padding:40px 0;color:var(--muted);">불러오는 중…</p>`;
+        const users = await window.IAYA.getUsers();
         main.innerHTML = `
           <div class="page-head">
             <h2>회원 관리</h2>
@@ -230,7 +239,7 @@
             <tbody>
               ${users.map((u) => `
                 <tr>
-                  <td>${escapeHtml(u.name)}</td>
+                  <td>${escapeHtml(u.name || "-")}</td>
                   <td>${escapeHtml(u.email)}</td>
                   <td>${escapeHtml(u.childName || "-")}</td>
                   <td>${u.childBirthYear || "-"}</td>
@@ -248,66 +257,68 @@
       }
 
       // Event delegation for admin actions.
-      main.addEventListener("click", (e) => {
+      main.addEventListener("click", async (e) => {
         const t = e.target;
-        if (t.matches("[data-new-notice]")) openNoticeModal();
-        else if (t.matches("[data-edit-notice]")) openNoticeModal(t.dataset.editNotice);
-        else if (t.matches("[data-del-notice]")) delNotice(t.dataset.delNotice);
-        else if (t.matches("[data-new-contest]")) openContestModal();
-        else if (t.matches("[data-edit-contest]")) openContestModal(t.dataset.editContest);
-        else if (t.matches("[data-del-contest]")) delContest(t.dataset.delContest);
-        else if (t.matches("[data-del-user]")) delUser(t.dataset.delUser);
+        if (t.matches("[data-new-notice]")) await openNoticeModal();
+        else if (t.matches("[data-edit-notice]")) await openNoticeModal(t.dataset.editNotice);
+        else if (t.matches("[data-del-notice]")) await delNotice(t.dataset.delNotice);
+        else if (t.matches("[data-new-contest]")) await openContestModal();
+        else if (t.matches("[data-edit-contest]")) await openContestModal(t.dataset.editContest);
+        else if (t.matches("[data-del-contest]")) await delContest(t.dataset.delContest);
+        else if (t.matches("[data-del-user]")) await delUser(t.dataset.delUser);
       });
 
       // Notice modal.
-      function openNoticeModal(id) {
+      async function openNoticeModal(id) {
         editingNoticeId = id || null;
         const modal = noticeModal;
         modal.querySelector("[data-title]").textContent = id ? "공지 수정" : "공지 작성";
-        const items = window.IAYA.getNotices();
-        const n = id ? items.find((x) => x.id === id) : null;
+        const n = id ? await window.IAYA.getNotice(id) : null;
         modal.querySelector("[data-n-title]").value = n ? n.title : "";
         modal.querySelector("[data-n-cat]").value = n ? n.category : "notice";
         modal.querySelector("[data-n-date]").value = n ? n.date : new Date().toISOString().slice(0, 10);
         modal.querySelector("[data-n-body]").value = n ? n.body : "";
         modal.classList.add("open");
       }
-      noticeModal.addEventListener("click", (e) => {
+      noticeModal.addEventListener("click", async (e) => {
         if (e.target === noticeModal || e.target.matches("[data-close]")) noticeModal.classList.remove("open");
-        if (e.target.matches("[data-n-save]")) saveNotice();
+        if (e.target.matches("[data-n-save]")) await saveNoticeAction();
       });
-      function saveNotice() {
-        const items = window.IAYA.getNotices();
+      async function saveNoticeAction() {
         const title = noticeModal.querySelector("[data-n-title]").value.trim();
         if (!title) { alert("제목을 입력해 주세요."); return; }
         const payload = {
+          id: editingNoticeId || ("n-" + Date.now().toString(36)),
           category: noticeModal.querySelector("[data-n-cat]").value,
           title,
           date: noticeModal.querySelector("[data-n-date]").value,
           body: noticeModal.querySelector("[data-n-body]").value.trim(),
           author: user.name,
         };
-        if (editingNoticeId) {
-          const i = items.findIndex((x) => x.id === editingNoticeId);
-          items[i] = { ...items[i], ...payload };
-        } else {
-          items.unshift({ id: "n-" + Date.now().toString(36), ...payload });
+        try {
+          await window.IAYA.saveNotice(payload);
+        } catch (err) {
+          alert("저장 실패: " + err.message);
+          return;
         }
-        window.IAYA.setNotices(items);
         noticeModal.classList.remove("open");
-        renderNotices();
+        await renderNotices();
       }
-      function delNotice(id) {
+      async function delNotice(id) {
         if (!confirm("이 공지를 삭제할까요?")) return;
-        const items = window.IAYA.getNotices().filter((x) => x.id !== id);
-        window.IAYA.setNotices(items);
-        renderNotices();
+        try {
+          await window.IAYA.deleteNotice(id);
+        } catch (err) {
+          alert("삭제 실패: " + err.message);
+          return;
+        }
+        await renderNotices();
       }
 
       // Contest modal.
-      function openContestModal(id) {
+      async function openContestModal(id) {
         editingContestId = id || null;
-        const items = window.IAYA.getContests();
+        const items = await window.IAYA.getContests();
         const c = id ? items.find((x) => x.id === id) : null;
         contestModal.querySelector("[data-title]").textContent = id ? "대회 수정" : "대회 등록";
         contestModal.querySelector("[data-c-title]").value = c ? c.title : "";
@@ -319,15 +330,15 @@
         contestModal.querySelector("[data-c-detail]").value = c ? c.detail : "";
         contestModal.classList.add("open");
       }
-      contestModal.addEventListener("click", (e) => {
+      contestModal.addEventListener("click", async (e) => {
         if (e.target === contestModal || e.target.matches("[data-close]")) contestModal.classList.remove("open");
-        if (e.target.matches("[data-c-save]")) saveContest();
+        if (e.target.matches("[data-c-save]")) await saveContestAction();
       });
-      function saveContest() {
-        const items = window.IAYA.getContests();
+      async function saveContestAction() {
         const title = contestModal.querySelector("[data-c-title]").value.trim();
         if (!title) { alert("대회명을 입력해 주세요."); return; }
         const payload = {
+          id: editingContestId || ("c-" + Date.now().toString(36)),
           title,
           kicker: "IAYA Program",
           status: contestModal.querySelector("[data-c-status]").value,
@@ -338,32 +349,39 @@
           detail: contestModal.querySelector("[data-c-detail]").value.trim(),
           cover: "primary",
         };
-        if (editingContestId) {
-          const i = items.findIndex((x) => x.id === editingContestId);
-          items[i] = { ...items[i], ...payload };
-        } else {
-          items.unshift({ id: "c-" + Date.now().toString(36), ...payload });
+        try {
+          await window.IAYA.saveContest(payload);
+        } catch (err) {
+          alert("저장 실패: " + err.message);
+          return;
         }
-        window.IAYA.setContests(items);
         contestModal.classList.remove("open");
-        renderContests();
+        await renderContests();
       }
-      function delContest(id) {
+      async function delContest(id) {
         if (!confirm("이 대회를 삭제할까요?")) return;
-        const items = window.IAYA.getContests().filter((x) => x.id !== id);
-        window.IAYA.setContests(items);
-        renderContests();
+        try {
+          await window.IAYA.deleteContest(id);
+        } catch (err) {
+          alert("삭제 실패: " + err.message);
+          return;
+        }
+        await renderContests();
       }
 
-      function delUser(id) {
-        if (!confirm("이 회원을 삭제할까요?")) return;
-        const items = window.IAYA.getUsers().filter((x) => x.id !== id);
-        window.IAYA.setUsers(items);
-        renderUsers();
+      async function delUser(id) {
+        if (!confirm("이 회원을 삭제할까요? (프로필만 삭제됨, Supabase Auth 계정은 대시보드에서 별도 삭제 필요)")) return;
+        try {
+          await window.IAYA.deleteUser(id);
+        } catch (err) {
+          alert("삭제 실패: " + err.message);
+          return;
+        }
+        await renderUsers();
       }
 
       // Initial view.
-      render("dashboard");
+      await render("dashboard");
     })();
   </script>
 </body>
