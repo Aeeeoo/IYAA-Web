@@ -58,9 +58,32 @@
     if (authError) return { ok: false, error: authError.message };
     if (!authData.user) return { ok: false, error: "가입에 실패했습니다." };
 
+    // Supabase는 이메일 열거 공격 방지를 위해 이미 존재하는 이메일에도
+    // 200 응답을 준다. 하지만 응답의 user.identities가 빈 배열이면 이미
+    // 등록된 이메일이라는 신호 — 사용자에게 명확히 알려준다.
+    if (authData.user.identities && authData.user.identities.length === 0) {
+      return {
+        ok: false,
+        alreadyRegistered: true,
+        error:
+          "이미 가입된 이메일입니다. 인증 메일을 확인하지 않으셨다면 메일함과 스팸함을 확인하시거나, 로그인 페이지에서 인증 메일 재발송을 요청해주세요.",
+      };
+    }
+
     // 이메일 인증이 켜져있으면 session이 null. 인증 후 자동 로그인.
     const needsEmailConfirm = !authData.session;
     return { ok: true, needsEmailConfirm, email: data.email };
+  }
+
+  // 인증 메일을 놓친 사용자용 재발송.
+  async function resendConfirmation(email) {
+    const { error } = await sb.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${location.origin}/verified.html` },
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
   }
 
   async function requireAdmin(redirect) {
@@ -73,5 +96,5 @@
     return user;
   }
 
-  window.Auth = { currentUser, login, logout, register, requireAdmin };
+  window.Auth = { currentUser, login, logout, register, resendConfirmation, requireAdmin };
 })();
