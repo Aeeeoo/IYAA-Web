@@ -62,7 +62,7 @@
       <footer class="site-footer">
         <div class="container">
           <div>
-            © ${year} International Association for Young Authors (IAYA)
+            © ${year} International Association for Young Authors (IAYA) · 국제어린이작가협회
           </div>
           <div class="foot-links">
             <a href="about.html">협회 소개</a>

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /verified.html
+Disallow: /login.html
+Disallow: /signup.html
+
+Sitemap: https://iaya.world/sitemap.xml
