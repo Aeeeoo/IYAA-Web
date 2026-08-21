@@ -64,20 +64,23 @@
           const showCat = c.category && c.category !== "-";
           const showPeriod = c.period && c.period !== "-";
           return `
-          <article class="contest-card">
-            <div class="cover ${c.cover === "alt" ? "alt" : c.cover === "dark" ? "dark" : ""}">
-              <div class="kicker">${escapeHtml(c.kicker)}</div>
-              <div class="title">${escapeHtml(c.title)}</div>
-            </div>
-            <div class="body">
-              <div class="meta">
-                <span class="status-badge ${c.status}">${statusLabel[c.status] || "Coming Soon"}</span>
-                ${showCat ? `<span>${escapeHtml(c.category)}</span>` : ""}
-                ${showPeriod ? `<span>${escapeHtml(c.period)}</span>` : ""}
+          <a href="contest-detail.html?id=${encodeURIComponent(c.id)}"
+             style="text-decoration:none; color:inherit; display:block;">
+            <article class="contest-card">
+              <div class="cover ${c.cover === "alt" ? "alt" : c.cover === "dark" ? "dark" : ""}">
+                <div class="kicker">${escapeHtml(c.kicker)}</div>
+                <div class="title">${escapeHtml(c.title)}</div>
               </div>
-              <p>${escapeHtml(c.summary)}</p>
-            </div>
-          </article>`;
+              <div class="body">
+                <div class="meta">
+                  <span class="status-badge ${c.status}">${statusLabel[c.status] || "Coming Soon"}</span>
+                  ${showCat ? `<span>${escapeHtml(c.category)}</span>` : ""}
+                  ${showPeriod ? `<span>${escapeHtml(c.period)}</span>` : ""}
+                </div>
+                <p>${escapeHtml(c.summary)}</p>
+              </div>
+            </article>
+          </a>`;
         })
         .join("");
     })();

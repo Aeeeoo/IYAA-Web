@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <title>Programs | International Association for Young Authors (IAYA)</title>
+  <meta name="description" content="International Association for Young Authors (IAYA, 국제어린이작가협회) 대회 상세." />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="contest">
+  <div data-header></div>
+
+  <main>
+    <section class="hero" style="padding: 60px 0 24px;">
+      <div class="container">
+        <span class="eyebrow">Programs</span>
+        <h1>대회 안내</h1>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 24px;">
+      <div class="container">
+        <div style="max-width: 860px; margin: 0 auto;">
+          <div data-contest-detail></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-footer></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      const target = document.querySelector("[data-contest-detail]");
+      const statusLabel = { open: "진행 중", upcoming: "Coming Soon", closed: "종료" };
+
+      function renderBody(raw) {
+        if (!raw) return "";
+        const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+        let html = looksLikeHtml ? raw : escapeHtml(raw).replace(/\n/g, "<br>");
+        html = html
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[\s\S]*?<\/style>/gi, "")
+          .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+          .replace(/\son\w+="[^"]*"/gi, "")
+          .replace(/\son\w+='[^']*'/gi, "");
+        return html;
+      }
+
+      function notFound(msg) {
+        target.innerHTML = `
+          <div style="padding:80px 0; text-align:center;">
+            <p style="color:var(--muted); margin-bottom:16px;">${msg}</p>
+            <a href="contest.html" class="btn btn-outline btn-sm">대회 목록으로</a>
+          </div>`;
+      }
+
+      if (!id) { notFound("대회 ID가 없습니다."); return; }
+      const items = await window.IAYA.getContests();
+      const c = items.find((x) => x.id === id);
+      if (!c) { notFound("해당 대회를 찾을 수 없습니다."); return; }
+
+      const showCat = c.category && c.category !== "-";
+      const showPeriod = c.period && c.period !== "-";
+      const showAward = c.award && c.award !== "-";
+
+      target.innerHTML = `
+        <a href="contest.html" style="display:inline-block; color:var(--muted); font-size:14px; margin-bottom:20px;">← 목록으로</a>
+
+        <article style="padding: 24px 0 48px; border-top: 2px solid var(--ink);">
+          <div style="padding: 28px 0 20px;">
+            <div style="margin-bottom:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <span class="status-badge ${c.status}">${statusLabel[c.status] || "Coming Soon"}</span>
+              ${showCat ? `<span style="color:var(--ink-soft); font-size:13px;">${escapeHtml(c.category)}</span>` : ""}
+            </div>
+            <div style="color: var(--muted); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px;">
+              ${escapeHtml(c.kicker || "")}
+            </div>
+            <h2 style="font-size: 1.9rem; font-weight:700; letter-spacing:-0.02em; margin-bottom: 14px; color: var(--ink);">
+              ${escapeHtml(c.title)}
+            </h2>
+            ${(showPeriod || showAward) ? `
+              <div style="color: var(--ink-soft); font-size: 14px; margin-top: 10px;">
+                ${showPeriod ? `<div><strong style="color:var(--ink); font-weight:600;">기간</strong> · ${escapeHtml(c.period)}</div>` : ""}
+                ${showAward ? `<div style="margin-top:4px;"><strong style="color:var(--ink); font-weight:600;">시상</strong> · ${escapeHtml(c.award)}</div>` : ""}
+              </div>` : ""}
+          </div>
+
+          ${c.summary ? `
+            <div style="padding: 20px 0; border-top: 1px solid var(--surface-alt); color: var(--ink-soft); font-size: 15.5px; line-height: 1.7;">
+              ${escapeHtml(c.summary)}
+            </div>` : ""}
+
+          <div class="notice-body" style="padding: 32px 0; border-top: 1px solid var(--surface-alt);">${renderBody(c.detail)}</div>
+        </article>
+      `;
+    })();
+  </script>
+</body>
+</html>
