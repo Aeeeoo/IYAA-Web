@@ -25,7 +25,6 @@
       <div class="container">
         <span class="eyebrow">Programs</span>
         <h1>대회 안내</h1>
-        <p>미취학 아동을 위한 IAYA의 첫 프로그램을 준비하고 있습니다. 자세한 내용은 준비되는 대로 안내드릴 예정입니다.</p>
       </div>
     </section>
 
@@ -64,22 +63,19 @@
           const showCat = c.category && c.category !== "-";
           const showPeriod = c.period && c.period !== "-";
           return `
-          <a href="contest-detail.html?id=${encodeURIComponent(c.id)}"
-             style="text-decoration:none; color:inherit; display:block;">
-            <article class="contest-card">
-              <div class="cover ${c.cover === "alt" ? "alt" : c.cover === "dark" ? "dark" : ""}">
-                <div class="kicker">${escapeHtml(c.kicker)}</div>
-                <div class="title">${escapeHtml(c.title)}</div>
+          <a class="contest-card" href="contest-detail.html?id=${encodeURIComponent(c.id)}">
+            <div class="cover ${c.cover === "alt" ? "alt" : c.cover === "dark" ? "dark" : ""}">
+              <div class="kicker">${escapeHtml(c.kicker)}</div>
+              <div class="title">${escapeHtml(c.title)}</div>
+            </div>
+            <div class="body">
+              <div class="meta">
+                <span class="status-badge ${c.status}">${statusLabel[c.status] || "Coming Soon"}</span>
+                ${showCat ? `<span>${escapeHtml(c.category)}</span>` : ""}
+                ${showPeriod ? `<span>${escapeHtml(c.period)}</span>` : ""}
               </div>
-              <div class="body">
-                <div class="meta">
-                  <span class="status-badge ${c.status}">${statusLabel[c.status] || "Coming Soon"}</span>
-                  ${showCat ? `<span>${escapeHtml(c.category)}</span>` : ""}
-                  ${showPeriod ? `<span>${escapeHtml(c.period)}</span>` : ""}
-                </div>
-                <p>${escapeHtml(c.summary)}</p>
-              </div>
-            </article>
+              <p>${escapeHtml(c.summary)}</p>
+            </div>
           </a>`;
         })
         .join("");

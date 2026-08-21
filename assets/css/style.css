@@ -516,15 +516,25 @@ p { color: var(--ink-soft); }
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+a.contest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 .contest-card .cover {
-  aspect-ratio: 16/9;
+  aspect-ratio: 21/9;
   background: var(--navy);
   color: #fff;
-  padding: 24px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+@media (max-width: 900px) {
+  .contest-card .cover { aspect-ratio: 5/2; }
 }
 .contest-card .cover.alt { background: var(--navy-deep); }
 .contest-card .cover.dark { background: var(--ink); }
