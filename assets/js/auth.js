@@ -96,5 +96,50 @@
     return user;
   }
 
-  window.Auth = { currentUser, login, logout, register, resendConfirmation, requireAdmin };
+  // 로그인 필수 게이트 (마이페이지용). 관리자든 회원이든 통과.
+  async function requireLogin(redirect) {
+    const user = await currentUser();
+    if (!user) {
+      alert("로그인이 필요한 페이지입니다.");
+      location.href = redirect || "login.html";
+      return null;
+    }
+    return user;
+  }
+
+  // 프로필 부가정보(이름, 자녀 정보, 국가) 갱신. profiles RLS의 own update 정책 통과.
+  async function updateProfile(patch) {
+    const user = await currentUser();
+    if (!user) return { ok: false, error: "로그인이 필요합니다." };
+    const row = {};
+    if (patch.name !== undefined) row.name = patch.name;
+    if (patch.childName !== undefined) row.child_name = patch.childName;
+    if (patch.childBirthYear !== undefined) row.child_birth_year = patch.childBirthYear;
+    if (patch.country !== undefined) row.country = patch.country;
+    const { error } = await sb.from("profiles").update(row).eq("id", user.id);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  }
+
+  // Supabase Auth의 비밀번호 변경 — 현재 세션 기반.
+  async function changePassword(newPassword) {
+    const { error } = await sb.auth.updateUser({ password: newPassword });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  }
+
+  // 본인 계정 완전 삭제. SQL RPC(delete_own_account)를 호출해서
+  // auth.users에서 지우고, cascade로 profiles도 함께 삭제된다.
+  async function deleteAccount() {
+    const { error } = await sb.rpc("delete_own_account");
+    if (error) return { ok: false, error: error.message };
+    await sb.auth.signOut();
+    return { ok: true };
+  }
+
+  window.Auth = {
+    currentUser, login, logout, register, resendConfirmation,
+    requireAdmin, requireLogin,
+    updateProfile, changePassword, deleteAccount,
+  };
 })();

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <title>마이페이지 | IAYA</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-nav="mypage">
+  <div data-header></div>
+
+  <main>
+    <section class="hero" style="padding: 60px 0 24px;">
+      <div class="container">
+        <div style="max-width: 860px; margin: 0 auto;">
+          <span class="eyebrow">My Page</span>
+          <h1>마이페이지</h1>
+          <p id="hello" style="color:var(--muted);">불러오는 중…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 12px;">
+      <div class="container">
+        <div style="max-width: 720px; margin: 0 auto; display: grid; gap: 32px;">
+
+          <!-- 개인정보 수정 -->
+          <div class="form-card" id="profile-card" style="max-width: none;">
+            <h2 style="font-size:1.2rem; margin-bottom:6px;">개인정보 수정</h2>
+            <p class="sub">보호자 이름과 자녀 정보, 국가를 변경할 수 있습니다. 이메일은 변경할 수 없습니다.</p>
+
+            <div class="alert alert-success" id="profile-ok" style="display:none;">저장되었습니다.</div>
+            <div class="alert alert-danger" id="profile-err" style="display:none;"></div>
+
+            <form id="profile-form" novalidate>
+              <div class="field">
+                <label>이메일</label>
+                <input type="email" id="email" disabled style="opacity:.6;" />
+              </div>
+              <div class="field">
+                <label for="name">보호자 이름</label>
+                <input type="text" id="name" required />
+              </div>
+              <div class="field">
+                <label for="childName">자녀 이름 (또는 애칭)</label>
+                <input type="text" id="childName" />
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="birthYear">자녀 출생 연도</label>
+                  <input type="number" id="birthYear" min="2018" max="2025" />
+                </div>
+                <div class="field">
+                  <label for="country">국가</label>
+                  <select id="country">
+                    <option value="">선택</option>
+                    <option value="KR">대한민국</option>
+                    <option value="JP">일본</option>
+                    <option value="US">미국</option>
+                    <option value="FR">프랑스</option>
+                    <option value="BR">브라질</option>
+                    <option value="KE">케냐</option>
+                    <option value="OTHER">기타</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">저장</button>
+            </form>
+          </div>
+
+          <!-- 비밀번호 변경 -->
+          <div class="form-card" style="max-width: none;">
+            <h2 style="font-size:1.2rem; margin-bottom:6px;">비밀번호 변경</h2>
+            <p class="sub">새 비밀번호를 입력하면 즉시 반영됩니다.</p>
+
+            <div class="alert alert-success" id="pw-ok" style="display:none;">비밀번호가 변경되었습니다.</div>
+            <div class="alert alert-danger" id="pw-err" style="display:none;"></div>
+
+            <form id="pw-form" novalidate>
+              <div class="field">
+                <label for="pw">새 비밀번호</label>
+                <input type="password" id="pw" placeholder="영문·숫자 포함 8자 이상" required />
+                <div class="hint">영문·숫자 포함 8자 이상</div>
+              </div>
+              <div class="field">
+                <label for="pw2">새 비밀번호 확인</label>
+                <input type="password" id="pw2" required />
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">비밀번호 변경</button>
+            </form>
+          </div>
+
+          <!-- 회원 탈퇴 -->
+          <div class="form-card" style="max-width: none;">
+            <h2 style="font-size:1.2rem; margin-bottom:6px; color: var(--danger);">회원 탈퇴</h2>
+            <p class="sub">
+              탈퇴 시 계정과 자녀 정보가 즉시 삭제되며, 복구할 수 없습니다.
+              동일한 이메일로 재가입은 가능합니다.
+            </p>
+            <button class="btn btn-danger btn-block" id="delete-btn">계정 삭제</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-footer></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>
+    (async function () {
+      const user = await window.Auth.requireLogin("login.html");
+      if (!user) return;
+
+      document.getElementById("hello").textContent =
+        `${user.name || user.email}님, 환영합니다.`;
+      document.getElementById("email").value = user.email;
+      document.getElementById("name").value = user.name || "";
+      document.getElementById("childName").value = user.childName || "";
+      document.getElementById("birthYear").value = user.childBirthYear || "";
+      document.getElementById("country").value = user.country || "";
+
+      const profileOk = document.getElementById("profile-ok");
+      const profileErr = document.getElementById("profile-err");
+      document.getElementById("profile-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        profileOk.style.display = "none";
+        profileErr.style.display = "none";
+
+        const name = document.getElementById("name").value.trim();
+        if (!name) {
+          profileErr.textContent = "보호자 이름을 입력해주세요.";
+          profileErr.style.display = "block";
+          return;
+        }
+        const birthYearRaw = document.getElementById("birthYear").value;
+        const patch = {
+          name,
+          childName: document.getElementById("childName").value.trim(),
+          childBirthYear: birthYearRaw ? Number(birthYearRaw) : null,
+          country: document.getElementById("country").value,
+        };
+        const res = await window.Auth.updateProfile(patch);
+        if (!res.ok) {
+          profileErr.textContent = "저장 실패: " + res.error;
+          profileErr.style.display = "block";
+          return;
+        }
+        profileOk.style.display = "block";
+      });
+
+      const pwOk = document.getElementById("pw-ok");
+      const pwErr = document.getElementById("pw-err");
+      document.getElementById("pw-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        pwOk.style.display = "none";
+        pwErr.style.display = "none";
+
+        const pw = document.getElementById("pw").value;
+        const pw2 = document.getElementById("pw2").value;
+        const pwOkFmt = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
+        if (!pwOkFmt) {
+          pwErr.textContent = "8자 이상, 영문과 숫자를 포함해야 합니다.";
+          pwErr.style.display = "block";
+          return;
+        }
+        if (pw !== pw2) {
+          pwErr.textContent = "두 비밀번호가 일치하지 않습니다.";
+          pwErr.style.display = "block";
+          return;
+        }
+        const res = await window.Auth.changePassword(pw);
+        if (!res.ok) {
+          pwErr.textContent = "변경 실패: " + res.error;
+          pwErr.style.display = "block";
+          return;
+        }
+        document.getElementById("pw").value = "";
+        document.getElementById("pw2").value = "";
+        pwOk.style.display = "block";
+      });
+
+      document.getElementById("delete-btn").addEventListener("click", async () => {
+        if (!confirm("정말로 계정을 삭제하시겠습니까?\n자녀 정보를 포함한 모든 데이터가 즉시 삭제되며 복구할 수 없습니다.")) return;
+        if (!confirm("마지막 확인입니다. 계속하시겠습니까?")) return;
+
+        const res = await window.Auth.deleteAccount();
+        if (!res.ok) {
+          alert("계정 삭제 실패: " + res.error);
+          return;
+        }
+        alert("계정이 삭제되었습니다. 이용해 주셔서 감사합니다.");
+        location.href = "index.html";
+      });
+    })();
+  </script>
+</body>
+</html>

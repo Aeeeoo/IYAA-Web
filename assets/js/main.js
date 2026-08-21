@@ -36,8 +36,8 @@
     const user = window.Auth ? await window.Auth.currentUser() : null;
     authSlot.innerHTML = user
       ? `
-        <span style="font-size:13px;color:var(--muted);">${escapeHtml(user.name)}${user.role === "admin" ? " · 관리자" : ""}</span>
         ${user.role === "admin" ? `<a class="btn btn-ghost" href="admin.html">관리자</a>` : ""}
+        <a class="btn btn-ghost" href="mypage.html">마이페이지</a>
         <button class="btn btn-outline" data-logout>로그아웃</button>
       `
       : `
