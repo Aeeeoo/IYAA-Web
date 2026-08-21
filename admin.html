@@ -52,7 +52,18 @@
         </div>
         <div class="field">
           <label>내용</label>
-          <textarea data-n-body rows="5"></textarea>
+          <div class="rich-toolbar" data-toolbar-for="data-n-body">
+            <button type="button" data-tool="p">단락</button>
+            <button type="button" data-tool="h3">소제목</button>
+            <button type="button" data-tool="b">굵게</button>
+            <button type="button" data-tool="a">링크</button>
+            <button type="button" data-tool="ul">목록</button>
+            <button type="button" data-tool="table">표 삽입</button>
+            <button type="button" data-tool="img">이미지</button>
+            <button type="button" data-tool="br">줄바꿈</button>
+          </div>
+          <textarea data-n-body rows="10" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;"></textarea>
+          <div class="hint">HTML 태그 사용 가능. 위 버튼으로 자주 쓰는 요소를 자동 삽입할 수 있습니다.</div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
           <button class="btn btn-ghost btn-sm" data-close>취소</button>
@@ -84,8 +95,22 @@
           <div class="field"><label>기간</label><input type="text" data-c-period placeholder="예: 2026-09-01 ~ 2026-10-31" /></div>
         </div>
         <div class="field"><label>시상</label><input type="text" data-c-award /></div>
-        <div class="field"><label>요약</label><textarea data-c-summary rows="3"></textarea></div>
-        <div class="field"><label>상세</label><textarea data-c-detail rows="4"></textarea></div>
+        <div class="field"><label>요약 (카드에 표시)</label><textarea data-c-summary rows="3"></textarea></div>
+        <div class="field">
+          <label>상세</label>
+          <div class="rich-toolbar" data-toolbar-for="data-c-detail">
+            <button type="button" data-tool="p">단락</button>
+            <button type="button" data-tool="h3">소제목</button>
+            <button type="button" data-tool="b">굵게</button>
+            <button type="button" data-tool="a">링크</button>
+            <button type="button" data-tool="ul">목록</button>
+            <button type="button" data-tool="table">표 삽입</button>
+            <button type="button" data-tool="img">이미지</button>
+            <button type="button" data-tool="br">줄바꿈</button>
+          </div>
+          <textarea data-c-detail rows="10" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;"></textarea>
+          <div class="hint">HTML 태그 사용 가능. 이미지는 URL을 입력해 삽입합니다.</div>
+        </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
           <button class="btn btn-ghost btn-sm" data-close>취소</button>
           <button class="btn btn-primary btn-sm" data-c-save>저장</button>
@@ -380,6 +405,108 @@
         }
         await renderUsers();
       }
+
+      // ── Rich toolbar: 텍스트에어리어의 커서 위치에 HTML 스니펫 삽입 ──
+      // 각 툴 버튼의 data-tool 값에 해당하는 템플릿을 넣어준다.
+      function insertAtCursor(textarea, snippet) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const before = textarea.value.slice(0, start);
+        const after = textarea.value.slice(end);
+        const selected = textarea.value.slice(start, end);
+        const withSel = snippet.replace("__SEL__", selected || "");
+        textarea.value = before + withSel + after;
+        textarea.focus();
+        const pos = start + withSel.length;
+        textarea.selectionStart = textarea.selectionEnd = pos;
+      }
+
+      // 파일 업로드는 비동기라 별도 처리 (아래 클릭 핸들러에서 취급).
+      function toolSnippet(tool) {
+        switch (tool) {
+          case "p": return "\n<p>__SEL__</p>\n";
+          case "h3": return "\n<h3>__SEL__</h3>\n";
+          case "b": return "<strong>__SEL__</strong>";
+          case "br": return "<br>\n";
+          case "ul":
+            return "\n<ul>\n  <li>__SEL__</li>\n  <li></li>\n</ul>\n";
+          case "a": {
+            const url = prompt("링크 주소(URL)를 입력하세요.", "https://");
+            if (!url) return "";
+            return `<a href="${url}" target="_blank">__SEL__</a>`;
+          }
+          case "table": {
+            const rowsStr = prompt("행 수(제목행 포함)를 입력하세요.", "3");
+            const colsStr = prompt("열 수를 입력하세요.", "3");
+            const rows = Math.max(2, parseInt(rowsStr, 10) || 3);
+            const cols = Math.max(1, parseInt(colsStr, 10) || 3);
+            let html = "\n<table>\n  <thead>\n    <tr>";
+            for (let c = 0; c < cols; c++) html += `<th>제목${c + 1}</th>`;
+            html += "</tr>\n  </thead>\n  <tbody>";
+            for (let r = 0; r < rows - 1; r++) {
+              html += "\n    <tr>";
+              for (let c = 0; c < cols; c++) html += `<td>내용</td>`;
+              html += "</tr>";
+            }
+            html += "\n  </tbody>\n</table>\n";
+            return html;
+          }
+          default: return "";
+        }
+      }
+
+      // 이미지 업로드용 숨은 file input (동적 생성).
+      async function uploadImageAndInsert(textarea) {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.style.display = "none";
+        document.body.appendChild(input);
+        input.click();
+
+        input.addEventListener("change", async () => {
+          const file = input.files && input.files[0];
+          input.remove();
+          if (!file) return;
+
+          // 파일명 안전화 + 유니크 prefix로 충돌 방지.
+          const ext = (file.name.split(".").pop() || "png").toLowerCase();
+          const path = `notice/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+          const { error: upErr } = await window.sb.storage
+            .from("notice-images")
+            .upload(path, file, { cacheControl: "3600", upsert: false });
+          if (upErr) {
+            alert("이미지 업로드 실패: " + upErr.message);
+            return;
+          }
+          const { data } = window.sb.storage.from("notice-images").getPublicUrl(path);
+          const url = data.publicUrl;
+          const alt = file.name.replace(/\.[^.]+$/, "");
+          insertAtCursor(textarea, `\n<img src="${url}" alt="${alt}" style="max-width:100%;height:auto;">\n`);
+        });
+      }
+
+      // 모달 안 툴바 버튼 위임 처리.
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".rich-toolbar [data-tool]");
+        if (!btn) return;
+        e.preventDefault();
+        const toolbar = btn.closest(".rich-toolbar");
+        const targetAttr = toolbar.dataset.toolbarFor;
+        const textarea = document.querySelector(`textarea[${targetAttr}]`);
+        if (!textarea) return;
+
+        // 이미지는 비동기 파일 업로드로 별도 처리.
+        if (btn.dataset.tool === "img") {
+          await uploadImageAndInsert(textarea);
+          return;
+        }
+
+        const snippet = toolSnippet(btn.dataset.tool);
+        if (!snippet) return;
+        insertAtCursor(textarea, snippet);
+      });
 
       // Initial view.
       await render("dashboard");

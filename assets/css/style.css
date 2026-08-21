@@ -617,6 +617,62 @@ p { color: var(--ink-soft); }
   z-index: 1;
 }
 
+/* --- Notice body (rich content: table, list, link) --------------------- */
+.notice-body {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+.notice-body p { margin: 0 0 14px; color: var(--ink-soft); }
+.notice-body strong, .notice-body b { color: var(--ink); font-weight: 700; }
+.notice-body a { color: var(--navy); text-decoration: underline; }
+.notice-body ul, .notice-body ol { margin: 0 0 14px 22px; }
+.notice-body li { margin-bottom: 4px; }
+.notice-body h3 { color: var(--ink); font-size: 1.05rem; margin: 24px 0 10px; font-weight: 700; }
+.notice-body h4 { color: var(--ink); font-size: 0.98rem; margin: 20px 0 8px; font-weight: 700; }
+.notice-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 14px;
+  background: #fff;
+}
+.notice-body th, .notice-body td {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  color: var(--ink);
+}
+.notice-body th {
+  background: var(--surface-alt);
+  font-weight: 700;
+  color: var(--ink);
+}
+.notice-body tr:nth-child(even) td { background: var(--surface-alt); }
+
+/* --- Rich-text editor toolbar (admin) --------------------------------- */
+.rich-toolbar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 6px;
+  background: var(--surface-alt);
+  margin-bottom: 8px;
+}
+.rich-toolbar button {
+  padding: 6px 10px;
+  border: 0;
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-family: var(--sans);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+.rich-toolbar button:hover { background: var(--surface-hover); color: var(--ink); }
+
 /* --- Modal ------------------------------------------------------------- */
 .modal-backdrop {
   position: fixed; inset: 0;
